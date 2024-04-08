@@ -22,7 +22,7 @@ const allSubjects = getAllSubjects(department,2);
 console.log(allSubjects);
 let subjWithProfArray = assignProfessorToSubjects(professors,allSubjects);
 let prepdSubjects = subjectSessionPrep(subjWithProfArray);
-let chosenSched = geneticAlgorithm(200,500,0.1,rooms,department,prepdSubjects);
+let chosenSched = geneticAlgorithm(200,500,0.05,rooms,department,prepdSubjects);
 console.log(constructGroupingsbyDepartment(department,chosenSched));
 
 //Fitness ruleset in the fitness function needs constant and thorough refining.

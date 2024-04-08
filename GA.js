@@ -50,7 +50,7 @@ const assignProfessorToSubjects = (professors,allSubjects) => {
                 chosenProf = fullTimeProfs[0];
                 chosenProf.priority++;
             }
-            else{
+            else if(fullTimeProfs.length>1){
                 highestPriority = fullTimeProfs.sort((a,b)=>{a.priority-b.priority})[0].priority;
                 contestingProfs = fullTimeProfs.filter(prof=>prof.priority==highestPriority);
                 if(contestingProfs.length==1){
@@ -61,6 +61,9 @@ const assignProfessorToSubjects = (professors,allSubjects) => {
                     chosenProf = contestingProfs[Math.floor(Math.random()*(contestingProfs.length-1))]
                     chosenProf.priority++;
                 }
+            }
+            else{
+                chosenProf = "TBA";
             }
         }
         subject.professor = chosenProf;
@@ -229,17 +232,17 @@ const fitnessFunction = (scheduleArray) => {        //this function evaluates th
     //this function should assign whether a single class is considered recessive or dominant
         //recessive traits are less likely to be used for crossovers but is more likely to mutate ro reroll some favorable properties
         //dominant trains are more likely to be used for crossovers but is less likely to mutate ro reroll some favorable properties
-        const overlappingTimeslotPenaltyPoints = 20;
-        const roomConflictPenaltyPoints = 10;
-        const professorConflictPenaltyPoints = 30;
-        const nstpOnWeekdaysPenalyPoints = 100;
-        let evaluatedSchedule;          //an array that holds a variable for the fitness evaluation and the schedule that is being evaluated
-        let conflictingTimeSlot=0;      //a variable that is incremented if there are conflicting time slots
-        let conflictingRooms=0;         //a variable that is incremented if there are conflicting rooms
-        let conflictingProfessor=0;     //a variable that is incremented if there are professors that are needed be 2 or more different classes at the same time
-        let weekDayNSTP=0;              //a variable that is incremented if there are NSTP Classes on weekdays
-        let maximumOopsiePoints=0;      //a variable that contains the maximum number of negative points that a schedule can have
-        let totalOopsiePoints=0;        //a variable that contains the accumulated number of negative points  of a schedule
+        const overlappingTimeslotPenaltyPoints = 20;    //a constant that holds the penalty value for a specific section with overlapping class hours.
+        const roomConflictPenaltyPoints = 10;           //a constant that holds the penalty value for rooms holding 2 or more classes simultaneously
+        const professorConflictPenaltyPoints = 30;      //a constant that holds the penalty value conflicting professor schedules
+        const nstpOnWeekdaysPenalyPoints = 100;         //a constant that holds the penalty value for NSTP being on weekdays
+        let evaluatedSchedule;                          //an array that holds a variable for the fitness evaluation and the schedule that is being evaluated
+        let conflictingTimeSlot=0;                      //a variable that is incremented if there are conflicting time slots
+        let conflictingRooms=0;                         //a variable that is incremented if there are conflicting rooms
+        let conflictingProfessor=0;                     //a variable that is incremented if there are professors that are needed be 2 or more different classes at the same time
+        let weekDayNSTP=0;                              //a variable that is incremented if there are NSTP Classes on weekdays
+        let maximumOopsiePoints=0;                      //a variable that contains the maximum number of negative points that a schedule can have
+        let totalOopsiePoints=0;                        //a variable that contains the accumulated number of negative points  of a schedule
         //TO-DO
         //calculate maximum oopsies - RESOLVED
         //count the number of classes that are NSTP - RESOLVED
@@ -253,15 +256,16 @@ const fitnessFunction = (scheduleArray) => {        //this function evaluates th
         for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length; currentClassIndex++){ //loop through all subjects to assign a default trait value of "dominant"
             scheduleArray[currentClassIndex].trait = "dominant";
         }
-    
-        for(let currentClassIndex = 0; currentClassIndex< scheduleArray.filter(selectedClass=>selectedClass.trait=="dominant").length-1; currentClassIndex++){
-    
+        // scheduleArray.filter(selectedClass=>selectedClass.trait=="dominant").length
+        for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length-1; currentClassIndex++){
             for(let comparedToIndex = currentClassIndex+1; comparedToIndex<scheduleArray.length;comparedToIndex++){
                 //check time conflict
-                if((scheduleArray[currentClassIndex].day == scheduleArray[comparedToIndex].day) &&
-                    (scheduleArray[currentClassIndex].section == scheduleArray[comparedToIndex].section) &&
-                    ((scheduleArray[currentClassIndex].startTime.slot<=scheduleArray[comparedToIndex].startTime.slot) &&
-                    (scheduleArray[currentClassIndex].endTime.slot<=scheduleArray[comparedToIndex].endTime.slot))){
+                if(((scheduleArray[currentClassIndex].day == scheduleArray[comparedToIndex].day) &&
+                    (scheduleArray[currentClassIndex].section == scheduleArray[comparedToIndex].section)) &&
+                    // (scheduleArray[currentClassIndex].subjCode != "NSTP1" || scheduleArray[currentClassIndex].subjCode != "NSTP2")&&    //It's ok for NSTP to have the exact time slot.
+                    (((scheduleArray[currentClassIndex].startTime.slot<=scheduleArray[comparedToIndex].startTime.slot) && (scheduleArray[currentClassIndex].endTime.slot<=scheduleArray[comparedToIndex].endTime.slot) && (scheduleArray[currentClassIndex].endTime.slot>=scheduleArray[comparedToIndex].startTime.slot)) || 
+                    ((scheduleArray[currentClassIndex].startTime.slot>=scheduleArray[comparedToIndex].startTime.slot) && (scheduleArray[currentClassIndex].startTime.slot<=scheduleArray[comparedToIndex].endTime.slot) && (scheduleArray[currentClassIndex].endTime.slot>=scheduleArray[comparedToIndex].startTime.slot)))
+                ){
                     conflictingTimeSlot += overlappingTimeslotPenaltyPoints;
                     scheduleArray[currentClassIndex].trait = "recessive";
                     scheduleArray[comparedToIndex].trait = "recessive"
@@ -276,7 +280,7 @@ const fitnessFunction = (scheduleArray) => {        //this function evaluates th
                     scheduleArray[currentClassIndex].trait = "recessive";
                     scheduleArray[comparedToIndex].trait = "recessive"
                 }
-    
+
                 //check room conflict
                 if(scheduleArray[currentClassIndex].day == scheduleArray[comparedToIndex].day &&
                     (scheduleArray[currentClassIndex].session == "f2f" && scheduleArray[comparedToIndex].session == "f2f") &&
@@ -289,22 +293,19 @@ const fitnessFunction = (scheduleArray) => {        //this function evaluates th
                 }
             }
         }
-    
+
         for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length; currentClassIndex++){ //loop through all subjects to search for an NSTP Subject
             //check if NSTP is on a weekday and starts at 7am;
-            if((scheduleArray[currentClassIndex].subjCode == "NSTP1" || scheduleArray[currentClassIndex].subjCode == "NSTP2") && scheduleArray[currentClassIndex].day!="saturday" && scheduleArray[currentClassIndex].startTime.slot!==7){
+            if((scheduleArray[currentClassIndex].subjCode == "NSTP1" || scheduleArray[currentClassIndex].subjCode == "NSTP2") && (scheduleArray[currentClassIndex].day!="saturday" && scheduleArray[currentClassIndex].startTime.slot!==7)){
                 weekDayNSTP += nstpOnWeekdaysPenalyPoints;
                 scheduleArray[currentClassIndex].trait = "recessive";
             }
         }
         // const recessiveCount = spreadedClasses.filter(selectedClass=>selectedClass.trait=="recessive").length;
         totalOopsiePoints = conflictingProfessor + conflictingRooms + conflictingTimeSlot + weekDayNSTP;
-        // evaluatedSchedule = (1/(1+(totalOopsiePoints/maximumOopsiePoints)))
-        // evaluatedSchedule = (1/(1+(totalOopsiePoints)))
         evaluatedSchedule = (1-(totalOopsiePoints/maximumOopsiePoints)); //simple fitness formula
-    
         //For Debugging purposes only
-        // console.log(`Classes Count: ${spreadedClasses.length}, total oopsies: ${totalOopsiePoints}, maximum oopsies: ${maximumOopsiePoints}, NSTP Classes: ${nstpClassCount}, non-NSTP Classes ${nonNSTPClassCount}`);
+        // console.log(`Classes Count: ${scheduleArray.length}, total oopsies: ${totalOopsiePoints}, maximum oopsies: ${maximumOopsiePoints}, NSTP Classes: ${nstpClassCount}`);
         // console.log(`Fitness: ${evaluatedSchedule*100}%, No. of recessive traits: ${recessiveCount}`);
         return {fitness:evaluatedSchedule, schedule:scheduleArray};
 }
@@ -364,10 +365,8 @@ const crossOverFunction = (schedule) => {           //this function splices the 
 }
 
 const mutationFunction = (mutationProb,schedPopulation,roomsArray) => {                    //[WORK IN PROGRESS]this function enables a schedule to reroll some of it's recessive genomes
-    // console.log("pre-mutation",schedGeneration);
     const roomsToBeUsed = new Rooms(roomsArray);
     schedPopulation.forEach(selectedSched=>{
-        // console.log(overAllSched);
         let defectiveClasses = selectedSched.filter(selectedClass=>selectedClass.trait=="recessive");
         defectiveClasses.forEach(selectedClass => {
             //reroll Room
@@ -406,7 +405,6 @@ const mutationFunction = (mutationProb,schedPopulation,roomsArray) => {         
             }
         })
     })
-    // console.log("post-mutation",schedGeneration);
     return schedPopulation;
 }
 
@@ -425,6 +423,7 @@ const generationLoop = (mutationProb,generationCount, initialPopulation,roomsArr
     // }
     let nthGeneration = 1;
     while(fittestSched.fitness != 1){                                                                           //loop that only stops when it finds a 100% fitness schedule
+
         let currentGeneration = crossOverFunction(newGeneration).sort((a,b)=>b.fitness-a.fitness);
         newGeneration = currentGeneration.map(sched=>sched.schedule);
         newGeneration = mutationFunction(mutationProb,newGeneration,roomsArray);
@@ -461,7 +460,6 @@ const fisherYatesShuffler = (array) => {                        //a function tha
 }
 
 const constructGroupingsbyDepartment = (department,overallSchedArray) => {
-    console.log(overallSchedArray);
     let structuredSchedule = [];
     department.forEach(course=>{
         let courseName = course.courseName;

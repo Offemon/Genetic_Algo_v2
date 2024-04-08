@@ -103,7 +103,7 @@ const curriculum = [
                 {subjCode:"GEC104",subjName:"Readings in the Philippine History", duration: 3, classType: "lec", expertiseReq:"General Education"},
                 {subjCode:"CC123",subjName:"Computer Programming 2", duration: 3, classType: "lab", expertiseReq:"Programming"},
                 {subjCode:"DS123",subjName:"Discrete Mathematics", duration: 3, classType: "lec", expertiseReq:"Computer Science"},
-                {subjCode:"HC123",subjName:"Intro. to Human Computer Interaction", duration: 3, classType: "lab", expertiseReq:""},
+                {subjCode:"HC123",subjName:"Intro. to Human Computer Interaction", duration: 3, classType: "lab", expertiseReq:"Computer Science"},
                 {subjCode:"VDG113",subjName:"Visual Design Graphics", duration: 3, classType: "lab", expertiseReq:"Multimedia"},
                 {subjCode:"PE102",subjName:"Physical Fitness 2", duration: 3, classType: "gym", expertiseReq:"Physical Education"},
                 {subjCode:"NSTP2",subjName:"National Service Training Program 1", duration: 3, classType: "out", expertiseReq:"General Education"}

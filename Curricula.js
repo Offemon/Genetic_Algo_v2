@@ -19,7 +19,7 @@ const curriculum = [
                 {subjCode:"GEC108",subjName:"Ethics", duration: 3, classType: "lec", expertiseReq:"Psychology"},
                 {subjCode:"GEC104",subjName:"Readings in the Philippine History", duration: 3, classType: "lec", expertiseReq:"General Education"},
                 {subjCode:"DS123",subjName:"Discrete Structures 1", duration: 3, classType: "lec", expertiseReq:"Computer Science"},
-                {subjCode:"CC123",subjName:"Intermediate Programming", duration: 3, classType: "lec", expertiseReq:"Programming"},
+                {subjCode:"CC123",subjName:"Intermediate Programming", duration: 3, classType: "lab", expertiseReq:"Programming"},
                 {subjCode:"DA123",subjName:"Digital Animation", duration: 3, classType: "lec", expertiseReq:"Animation"},
                 {subjCode:"HCH123",subjName:"Human Computer Interaction", duration: 3, classType: "lec", expertiseReq:"Computer Science"},
                 {subjCode:"PE102",subjName:"Physical Fitness 2", duration: 3, classType: "gym", expertiseReq:"Physical Education"},
@@ -45,7 +45,7 @@ const curriculum = [
                 {subjCode:"AL223",subjName:"Algorithms and Complexity", duration: 3, classType: "lec", expertiseReq:"Computer Science"},
                 {subjCode:"WST213",subjName:"Web System and Technologoes", duration: 3, classType: "lab", expertiseReq:"Web Development"},
                 {subjCode:"CSS221",subjName:"Computer System Servicing", duration: 3, classType: "lab", expertiseReq:"Hardware"},
-                {subjCode:"GAD223",subjName:"3d Game Art Development", duration: 3, classType: "Lab", expertiseReq:"Game Development"},
+                {subjCode:"GAD223",subjName:"3d Game Art Development", duration: 3, classType: "lab", expertiseReq:"Game Development"},
                 {subjCode:"PE104",subjName:"Physical Fitness 4", duration: 3, classType: "gym", expertiseReq:"Physical Education"}
             ]
             },
@@ -54,7 +54,7 @@ const curriculum = [
                 {subjCode:"FIL101",subjName:"Kontekstwalizasong Komunikasyon sa Filipino", duration: 3, classType: "lec", expertiseReq:"General Education"},
                 {subjCode:"AL313",subjName:"Automata Theory and Formal Languages", duration: 3, classType: "lec", expertiseReq:"Computer Science"},
                 {subjCode:"AR313",subjName:"Architecture and Organization", duration: 3, classType: "lab", expertiseReq:"Hardware"},
-                {subjCode:"CC313",subjName:"Application Dev't and Emerging Technologies", duration: 3, classType: "Lab", expertiseReq:"Web Development"},
+                {subjCode:"CC313",subjName:"Application Dev't and Emerging Technologies", duration: 3, classType: "lab", expertiseReq:"Web Development"},
                 {subjCode:"IAS313",subjName:"Information Assurance and Security", duration: 3, classType: "lec", expertiseReq:"Cybersecurity"},
                 {subjCode:"ELEC313",subjName:"CS Elective 1", duration: 3, classType: "lab", expertiseReq:"Computer Science"}
             ],

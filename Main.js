@@ -18,21 +18,27 @@ const department = [
         ]
     }
 ]
-const allSubjects = getAllSubjects(department,2);
-// // console.log(allSubjects);
-let subjWithProfArray = assignProfessorToSubjects(professors,allSubjects);
-let prepdSubjects = subjectSessionPrep(subjWithProfArray);
-// console.log(prepdSubjects);
-// console.log(initializePopulation(1,prepdSubjects,rooms,department));
-// fitnessFunction(initializePopulation(1,prepdSubjects,rooms,department)[0]);
 
-let chosenSched = geneticAlgorithm(4,100,0.05,rooms,department,prepdSubjects,professors);
+const config = 
+    {semester: 1,                           //configuration for the semester
+    enableProfessorReassignment: true,      //configuration if the algorithm is allowed to change professors for each subject
+    enableVariedProfessors: true,           //configuration if the algorithm is allowed to assign different professors for different sections but for the same subject
+    populationSize: 4,                      //configuration for the population size.POPULATION SIZE MUST BE PERFECTLY DIVISIBLE BY 4.Recommended popsize is 500 for performance
+    maxGenerations:1,                      //configuration for the minimum number of generations
+    mutationProbability:0.05,                //configuration for the mutation probability. recommended value is 0.05;
+    sessionImplementation: "hybrid"         //configuration whether the schedule is purely f2f, purely online, or hybrid
+}
+
+const allSubjects = getAllSubjects(department,config);
+let subjWithProfArray = assignProfessorToSubjects(professors,allSubjects);
+let prepdSubjects = subjectSessionPrep(subjWithProfArray,config);
+let chosenSched = geneticAlgorithm(rooms,department,prepdSubjects,professors,config);
 
 //TO-DO
+//refine Mutation function - reroll Professor
 //Create a contingency function that will try to resolve the remaining recessive classes
 //using a greedy algorithm as a last resort: Best fit Algorithm
 
-// console.log(chosenSched.length);
 console.log(constructGroupingsbyDepartment(department,chosenSched));
 
 //Fitness ruleset in the fitness function needs constant and thorough refining.

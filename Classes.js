@@ -23,66 +23,66 @@ class Rooms {
 
     //returns an array based on room type. "comp_lab", "gym", "lec", or "cul_lab"
     fetchRoomsByType(type){
-        return new Rooms(this.rooms.filter(room => room.type===type));
+        return new Rooms(this.rooms.filter(room => room.room_type===type));
     }
 }
 
 //Professors Class
-class Professors{
-    constructor(professors){
-        this.professors = professors
-    }
+// class Professors{
+//     constructor(professors){
+//         this.professors = professors
+//     }
 
-    //returns an array of all Professors
-    getProfessors(){
-        return this.professors
-    }
+//     //returns an array of all Professors
+//     getProfessors(){
+//         return this.professors
+//     }
 
-    //returns an array of all Full-Time Professors
-    getFullTime(){
-        return new Professors(this.professors.filter(professor => professor.employmentType === "full-time"));
-    }
+//     //returns an array of all Full-Time Professors
+//     getFullTime(){
+//         return new Professors(this.professors.filter(professor => professor.employmentType === "full-time"));
+//     }
 
-    //returns an array of all Part-time Professors
-    getPartTime(){
-        return new Professors(this.professors.filter(professor => professor.employmentType === "part-time"));
-    }
+//     //returns an array of all Part-time Professors
+//     getPartTime(){
+//         return new Professors(this.professors.filter(professor => professor.employmentType === "part-time"));
+//     }
 
-    //returns an array of professors on a given day
-    getByAvailability(day){
-        return new Professors(this.professors.filter(professor => professor.availability.includes(day)));
-    }
+//     //returns an array of professors on a given day
+//     getByAvailability(day){
+//         return new Professors(this.professors.filter(professor => professor.availability.includes(day)));
+//     }
 
-    //returns an array of professors on a given expertise
-    getByExpertise(expertise){
-        return new Professors(this.professors.filter(professor => professor.expertise.includes(expertise)));
-    }
+//     //returns an array of professors on a given expertise
+//     getByExpertise(expertise){
+//         return new Professors(this.professors.filter(professor => professor.expertise.includes(expertise)));
+//     }
 
-    //returns an array of professors on a given department
-    getByDepartment(dep){
-        return new Professors(this.professors.filter(professor => professor.department === dep));
-    }
-}
+//     //returns an array of professors on a given department
+//     getByDepartment(dep){
+//         return new Professors(this.professors.filter(professor => professor.department === dep));
+//     }
+// }
 
-class Curricula {
-    constructor(curricula){
-        this.curricula = curricula;
-    }
+// class Curricula {
+//     constructor(curricula){
+//         this.curricula = curricula;
+//     }
 
-    getCurricula(){
-        return this.curricula;
-    }
+//     getCurricula(){
+//         return this.curricula;
+//     }
 
-    getBySchoolYear(sy){
-        return new Curricula(this.curricula.filter(curriculum => curriculum.schoolYear===sy));
-    }
+//     getBySchoolYear(sy){
+//         return new Curricula(this.curricula.filter(curriculum => curriculum.schoolYear===sy));
+//     }
 
-    getByDepartment(department){
-        return new Curricula(this.curricula.filter(curriculum => curriculum.department===department));
-    }
+//     getByDepartment(department){
+//         return new Curricula(this.curricula.filter(curriculum => curriculum.department===department));
+//     }
 
     
-}
+// }
 
 // class Curricula {
 //     constructor(curricula){

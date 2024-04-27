@@ -15,3 +15,4 @@ const professors = [
     {fullname: "Prof N", department: "GENED", employment_type: "full-time", availability:["monday","tuesday","wednesday","thursday","friday","saturday"], expertise: ["General Education","Physical Education"]},
     {fullname: "Prof O", department: "GENED", employment_type: "full-time", availability:["monday","tuesday","wednesday","thursday","friday","saturday"], expertise: ["General Education","Mathematics"]},
 ]
+

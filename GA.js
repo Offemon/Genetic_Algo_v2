@@ -1,7 +1,8 @@
-
+"use strict";
 const getAllSubjects = (department,config) => {
     const activeSemester = config.semester;
     let allSubjects = [];
+    let subjects;
     department.forEach(course=>{
         course.levels.forEach(level=>{
             let selectedLevel = level.level;
@@ -20,6 +21,8 @@ const getAllSubjects = (department,config) => {
 }
 
 const assignProfessorToSubjects = (professors,allSubjects) => {
+    let highestPriority;
+    let contestingProfs;
     professors.forEach(professor=>{
         professor.priority = 1;
     });
@@ -147,8 +150,16 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
     const popSize = config.populationSize
     let initialPopulation = [];
     let overAllSched = [];
-    let sectionLevelSched = []
-    // let levelSched = [];
+    let sectionLevelSched = [];
+    let timeSlot;
+    let startTime;
+    let endTime
+    let currentCourse;
+    let currentSection;
+    let levelSched;
+    let currentLevel;
+    let currentDay;
+    let chosenRoom;
     // const roomsToBeUsed = new Rooms(roomsArray);
     let days = ["monday","tuesday","wednesday","thursday","friday","saturday"]
     for(let popCounter = 0; popCounter < popSize; popCounter++){
@@ -263,10 +274,12 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
     return initialPopulation;
 }
 
-const fitnessFunction = (scheduleArray,config) => {        //this function evaluates the fitness of a single generated schedule - NEEDS CONSTANT REFINING
+const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //this function evaluates the fitness of a single generated schedule - NEEDS CONSTANT REFINING
         const implementationType = config.sessionImplementation;
         const nstpTargetDay = config.nstpTargetDay;
         const nstpTargetStartTime = config.nstpTargetStartTime;
+        let dominantClasses;
+        const inportedScheduleArray = [];
         //criterias:
         //NSTP classes should be on Saturdays and starts at 7am
         //No two or more classes of share the same classroom at the same time
@@ -280,6 +293,31 @@ const fitnessFunction = (scheduleArray,config) => {        //this function evalu
             scheduleArray[currentClassIndex].issues = [];
             scheduleArray[currentClassIndex].conflictWith = [];
         }
+
+        if(approvedSchedArr.length>0 || approvedSchedArr != null){
+            let currentSubject;
+            let subjectComparedTo;
+            for(let currApprovedSchedClassIndex = 0; currApprovedSchedClassIndex < approvedSchedArr.length; currApprovedSchedClassIndex++){
+                currentSubject = approvedSchedArr[currApprovedSchedClassIndex];
+                for(let schedArrIndex = 0; schedArrIndex < scheduleArray.length; schedArrIndex++){
+                    subjectComparedTo = scheduleArray[schedArrIndex];
+                    
+                    //check professor conflict
+                    if(isProfConflict(currentSubject,subjectComparedTo)){
+                        if(!subjectComparedTo.issues.includes("professor_conflict")) subjectComparedTo.issues.push("professor_conflict");
+                        subjectComparedTo.trait = "recessive";
+
+                    }
+                    // check room conflict
+                    if(isSameF2F(currentSubject,subjectComparedTo) && isSameDay(currentSubject,subjectComparedTo) && isSameRoom(currentSubject,subjectComparedTo) && isOverLapping(currentSubject,subjectComparedTo)){
+                        if(!subjectComparedTo.issues.includes("room_conflict")) subjectComparedTo.issues.push("room_conflict");
+                        subjectComparedTo.trait = "recessive";
+                    }
+                }
+            }
+        }
+
+        
         for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length; currentClassIndex++){
             let currentSubject = scheduleArray[currentClassIndex];
 
@@ -288,6 +326,7 @@ const fitnessFunction = (scheduleArray,config) => {        //this function evalu
                 if(currentSubject.startTime.slot > 16){
                     if(!currentSubject.issues.includes("late_start")) currentSubject.issues.push("late_start");
                     currentSubject.trait = "recessive";
+                    
                 }
             }
             if(currentSubject.trait == "dominant"){
@@ -362,10 +401,10 @@ const fitnessFunction = (scheduleArray,config) => {        //this function evalu
         return {fitness:evaluatedSchedule, schedule:scheduleArray};
 }
 
-const evaluatePopulation = (schedPopulation,config) => {   //this function evaluates an entire generated population of schedules and returns a spreaded classes with fitness values attached to each schedule
+const evaluatePopulation = (approvedSchedArr,schedPopulation,config) => {   //this function evaluates an entire generated population of schedules and returns a spreaded classes with fitness values attached to each schedule
     let evaluatedPopulation = [];
     schedPopulation.forEach(sched=>{
-        evaluatedPopulation.push(fitnessFunction(sched,config));
+        evaluatedPopulation.push(fitnessFunction(approvedSchedArr,sched,config));
     })
     return evaluatedPopulation;
 }
@@ -373,7 +412,7 @@ const evaluatePopulation = (schedPopulation,config) => {   //this function evalu
 const crossOverFunction = (schedule,stagnationCounter,config) => {           //this function splices the genomes of the best schedule - 2 at a time
     let crossOveredSched = [];
     // console.log(`Crossover initial:`);
-    // console.log(evaluatePopulation(schedule).sort((a,b)=>b.fitness-a.fitness));
+    // console.log(evaluatePopulation(approvedSchedArr,schedule).sort((a,b)=>b.fitness-a.fitness));
     //TO-DO
     //get the top half of the sorted array - RESOLVED!
     //create an operation that that creates an offspring of the top half from the previous operation - RESOLVED!
@@ -381,7 +420,7 @@ const crossOverFunction = (schedule,stagnationCounter,config) => {           //t
     //Eugenics Operator
     if(stagnationCounter%50===0 && stagnationCounter > 0){
         // console.log("Starting Eugenics");
-        let sortedSchedArray = evaluatePopulation(schedule,config).sort((a,b)=>b.fitness-a.fitness);
+        let sortedSchedArray = evaluatePopulation(approvedSchedArr,schedule,config).sort((a,b)=>b.fitness-a.fitness);
 
         // console.log(sortedSchedArray);
         let bestHalf = sortedSchedArray.slice(0,sortedSchedArray.length/2);
@@ -425,8 +464,8 @@ const crossOverFunction = (schedule,stagnationCounter,config) => {           //t
     else{
         let offSpringSchedule = [];
         const midIndex = Math.ceil(schedule.length/2);
-        let firstHalf = evaluatePopulation(schedule.slice(0,midIndex),config).sort((a,b)=>b.fitness-a.fitness).map(sched=>sched.schedule);
-        let secondHalf = evaluatePopulation(schedule.slice(midIndex),config).sort((a,b)=>a.fitness-b.fitness).map(sched=>sched.schedule);
+        let firstHalf = evaluatePopulation(approvedSchedArr,schedule.slice(0,midIndex),config).sort((a,b)=>b.fitness-a.fitness).map(sched=>sched.schedule);
+        let secondHalf = evaluatePopulation(approvedSchedArr,schedule.slice(midIndex),config).sort((a,b)=>a.fitness-b.fitness).map(sched=>sched.schedule);
         for(let schedCurrentIndex = 0; schedCurrentIndex < firstHalf.length; schedCurrentIndex++){
             let parentA = firstHalf[schedCurrentIndex];
             let parentB = secondHalf[schedCurrentIndex];
@@ -453,8 +492,8 @@ const crossOverFunction = (schedule,stagnationCounter,config) => {           //t
             crossOveredSched.push(offSpringSchedule);
         }
     }
-    // console.log(evaluatePopulation(crossOveredSched).sort((a,b)=>b.fitness-a.fitness))
-    return evaluatePopulation(crossOveredSched,config).sort((a,b)=>b.fitness-a.fitness);
+    // console.log(evaluatePopulation(approvedSchedArr,crossOveredSched).sort((a,b)=>b.fitness-a.fitness))
+    return evaluatePopulation(approvedSchedArr,crossOveredSched,config).sort((a,b)=>b.fitness-a.fitness);
 }
 
 const mutationFunction = (schedPopulation,roomsArray,professors,config) => {                    //[WORK IN PROGRESS]this function enables a schedule to reroll some of it's recessive genomes
@@ -581,10 +620,10 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
     return schedPopulation;
 }
 
-const generationLoop = (initialPopulation,roomsArray,professors,config) => {   //[WORK IN PROGRESS - Mutation Function not yet Implemented]this function will perform the crossover functions and mutations to generate a new generation of schedules.
+const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors,config) => {   //[WORK IN PROGRESS - Mutation Function not yet Implemented]this function will perform the crossover functions and mutations to generate a new generation of schedules.
     const generationCount = config.maxGenerations;
     let newGeneration = initialPopulation;
-    let fittestSched = evaluatePopulation(newGeneration,config).sort((a,b)=>b.fitness-a.fitness)[0];
+    let fittestSched = evaluatePopulation(approvedSchedArr,newGeneration,config).sort((a,b)=>b.fitness-a.fitness)[0];
     let stagnationCounter = 0
     for(let generationCounter = 0; generationCounter < generationCount; generationCounter++){
         let currentGeneration = crossOverFunction(newGeneration,stagnationCounter,config).sort((a,b)=>b.fitness-a.fitness);
@@ -601,7 +640,7 @@ const generationLoop = (initialPopulation,roomsArray,professors,config) => {   /
         else{
             stagnationCounter++
         }
-        newGeneration = evaluatePopulation(mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
+        newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
         console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
         console.log("Fittest Sched: ", fittestSched);
     }
@@ -620,9 +659,9 @@ const generationLoop = (initialPopulation,roomsArray,professors,config) => {   /
     return fittestSched;
 }
 
-const geneticAlgorithm = (roomsArray,department,prepdSubjects,professors,config) => {     //[WORK IN PROGRESS]this is hte Main Genetic Algorithm function
+const geneticAlgorithm = (roomsArray,department,prepdSubjects,approvedSchedArr,professors,config) => {     //[WORK IN PROGRESS]this is hte Main Genetic Algorithm function
     let initPopArray = initializePopulation(prepdSubjects,roomsArray,department,config);
-    let fittestSched = generationLoop(initPopArray,roomsArray,professors,config);
+    let fittestSched = generationLoop(approvedSchedArr,initPopArray,roomsArray,professors,config);
     return fittestSched.schedule;
 }
 

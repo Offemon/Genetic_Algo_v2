@@ -1,7 +1,7 @@
 //Classes Section. Builder Pattern implemented
 
 // Rooms Class
-class Rooms {
+export class Rooms {
     constructor (roomArr){
         this.rooms = roomArr;
     }

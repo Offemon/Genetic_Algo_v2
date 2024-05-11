@@ -1,4 +1,4 @@
-const professors = [
+export const professors = [
     {fullname: "Prof A", department: "CCS", employment_type: "full-time", availability:["monday","tuesday","wednesday","thursday","friday","saturday"], expertise: ["Data Structures", "Algorithms","Programming", "Computer Science"]},
     {fullname: "Prof B", department: "CCS", employment_type: "full-time", availability:["monday","tuesday","wednesday","thursday","friday","saturday"], expertise: ["Programming", "Software Engineering", "Computer Science","Database"]},
     {fullname: "Prof C", department: "CCS", employment_type: "full-time", availability:["monday","tuesday","wednesday","thursday","friday","saturday"], expertise: ["Database","Programming", "Computer Science"]},

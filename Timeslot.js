@@ -1,4 +1,4 @@
-const time = [
+export const time = [
     {slot:7,value:"7:00"},
     {slot:7.5,value:"7:30"},
     {slot:8,value:"8:00"},

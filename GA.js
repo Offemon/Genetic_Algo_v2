@@ -1,5 +1,8 @@
 "use strict";
-const getAllSubjects = (department,config) => {
+import { userDepartment } from "./Main.js";
+import { Rooms } from "./Classes.js";
+import { time } from "./Timeslot.js";
+export const getAllSubjects = (department,config) => {
     const activeSemester = config.semester;
     let allSubjects = [];
     let subjects;
@@ -20,7 +23,7 @@ const getAllSubjects = (department,config) => {
     return allSubjects;
 }
 
-const assignProfessorToSubjects = (professors,allSubjects) => {
+export const assignProfessorToSubjects = (professors,allSubjects) => {
     let highestPriority;
     let contestingProfs;
     professors.forEach(professor=>{
@@ -75,7 +78,7 @@ const assignProfessorToSubjects = (professors,allSubjects) => {
     return allSubjects;
 }
 
-const subjectSessionPrep = (subjectArray,config) => {                  //a function that attaches an assignment variable and session property based on its classType
+export const subjectSessionPrep = (subjectArray,config) => {                  //a function that attaches an assignment variable and session property based on its classType
     const implementation = config.sessionImplementation;
     let newsubjectArray = [];
     let series = 0;
@@ -421,7 +424,7 @@ const evaluatePopulation = (approvedSchedArr,schedPopulation,config) => {   //th
     return evaluatedPopulation;
 }
 
-const crossOverFunction = (schedule,stagnationCounter,config) => {           //this function splices the genomes of the best schedule - 2 at a time
+const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) => {           //this function splices the genomes of the best schedule - 2 at a time
     let crossOveredSched = [];
     // console.log(`Crossover initial:`);
     // console.log(evaluatePopulation(approvedSchedArr,schedule).sort((a,b)=>b.fitness-a.fitness));
@@ -639,7 +642,7 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
     let fittestSched = evaluatePopulation(approvedSchedArr,newGeneration,config).sort((a,b)=>b.fitness-a.fitness)[0];
     let stagnationCounter = 0
     for(let generationCounter = 0; generationCounter < generationCount; generationCounter++){
-        let currentGeneration = crossOverFunction(newGeneration,stagnationCounter,config).sort((a,b)=>b.fitness-a.fitness);
+        let currentGeneration = crossOverFunction(newGeneration,stagnationCounter,approvedSchedArr,config).sort((a,b)=>b.fitness-a.fitness);
         newGeneration = currentGeneration.map(sched=>sched.schedule);
         if(fittestSched.fitness < currentGeneration[0].fitness){
             fittestSched = currentGeneration[0];
@@ -672,7 +675,7 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
     return fittestSched;
 }
 
-const geneticAlgorithm = (roomsArray,department,prepdSubjects,approvedSchedArr,professors,config) => {     //[WORK IN PROGRESS]this is hte Main Genetic Algorithm function
+export const geneticAlgorithm = (roomsArray,department,prepdSubjects,approvedSchedArr,professors,config) => {     //[WORK IN PROGRESS]this is hte Main Genetic Algorithm function
     let initPopArray = initializePopulation(prepdSubjects,roomsArray,department,config);
     let fittestSched = generationLoop(approvedSchedArr,initPopArray,roomsArray,professors,config);
     return fittestSched.schedule;
@@ -693,7 +696,7 @@ const fisherYatesShuffler = (array) => {                        //a function tha
     return array;
 }
 
-const constructGroupingsbyDepartment = (department,overallSchedArray) => {
+export const constructGroupingsbyDepartment = (department,overallSchedArray) => {
     let structuredSchedule = [];
     department.forEach(course=>{
         let courseName = course.courseName;
@@ -838,7 +841,7 @@ const hasTargetTimeAndDate = (classObj,targetTimeSlot, targetDay) => {
     return classObj.startTime.slot == targetTimeSlot && classObj.day === targetDay ? true : false;
 }
 
-const checkForConflicts = (schedArr,editedClassObj) => {
+export const checkForConflicts = (schedArr,editedClassObj) => {
     let conflitSubjects = [];
     schedArr.forEach(selectedClassObj => {
         if(isSameSection(selectedClassObj,editedClassObj) && isSameSubject(selectedClassObj,editedClassObj)){

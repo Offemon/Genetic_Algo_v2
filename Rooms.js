@@ -1,4 +1,4 @@
-const rooms = [
+export const rooms = [
     {room_no: "gym", room_type: "gym", status:"enabled"},
     {room_no: "101", room_type: "lec", status:"enabled"},
     {room_no: "102", room_type: "lec", status:"enabled"},

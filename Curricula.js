@@ -1,4 +1,4 @@
-const curriculum = [
+export const curriculum = [
     {curriculumID:"LOA-CCS-BSCS-2324-01",
     schoolYear: "2023-2024",
     department:"ccs",

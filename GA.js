@@ -84,7 +84,6 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
     let series = 0;
     if(implementation === "hybrid"){
         subjectArray.forEach(subject=>{
-            // duration = subject.subject.duration
             subject.assigned = false;
             if(subject.classType==="lec"){
                 subject.duration = 1.5;
@@ -109,7 +108,6 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
     }
     if(implementation === "f2f"){
         subjectArray.forEach(subject=>{
-            // duration = subject.subject.duration
             subject.assigned = false;
             if(subject.classType==="lec"){
                 subject.duration = 1.5;
@@ -134,7 +132,6 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
     }
     if(implementation === "online"){
         subjectArray.forEach(subject=>{
-            // duration = subject.subject.duration
             subject.assigned = false;
             if(subject.classType==="lec"){
                 subject.duration = 1.5;
@@ -175,7 +172,6 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
     let currentLevel;
     let currentDay;
     let chosenRoom;
-    // const roomsToBeUsed = new Rooms(roomsArray);
     let days = ["monday","tuesday","wednesday","thursday","friday","saturday"]
     for(let popCounter = 0; popCounter < popSize; popCounter++){
         overAllSched = [];
@@ -202,26 +198,6 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                     chosenRoom = "-"
                                 }
                                 else{
-                                    // switch(subject.classType.slice(-3)){ // this needs to have its own function
-                                    //     case "lec":
-                                    //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
-                                    //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                                    //         break;
-                                    //     case "lab":
-                                    //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
-                                    //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                                    //         break;
-                                    //     case "gym":
-                                    //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
-                                    //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                                    //         break;
-                                    //     case "outdoor":
-                                    //         chosenRoom = "TBA";
-                                    //         break;
-                                    //     default:
-                                    //         chosenRoom = "TBA"
-                                    //         break;
-                                    // }
                                     chosenRoom = assignRoom(subject,roomsArray);
                                 }
                                 timeSlot = time[Math.floor(Math.random()*(time.length-11))].slot;
@@ -238,26 +214,6 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                     chosenRoom = "-"
                                 }
                                 else{
-                                    // switch(subject.classType.slice(-3)){ // this needs to have its own function
-                                    //     case "lec":
-                                    //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
-                                    //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                                    //         break;
-                                    //     case "lab":
-                                    //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
-                                    //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                                    //         break;
-                                    //     case "gym":
-                                    //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
-                                    //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                                    //         break;
-                                    //     case "outdoor":
-                                    //         chosenRoom = "TBA";
-                                    //         break;
-                                    //     default:
-                                    //         chosenRoom = "TBA"
-                                    //         break;
-                                    // }
                                     chosenRoom = assignRoom(subject,roomsArray);
                                 }
                                 timeSlot = time[Math.floor(Math.random()*(time.length-11))].slot;
@@ -294,13 +250,12 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
         const nstpTargetDay = config.nstpTargetDay;
         const nstpTargetStartTime = config.nstpTargetStartTime;
         let dominantClasses;
-        // const inportedScheduleArray = approvedSchedArr;
         //criterias:
         //NSTP classes should be on Saturdays and starts at 7am
         //No two or more classes of share the same classroom at the same time
         //No two or more classes of share the same professor at the same time
         //No two or more classes share or has overlapping time slot
-    //this function should assign whether a single class is considered recessive or dominant
+        //this function should assign whether a single class is considered recessive or dominant
         let evaluatedSchedule;                          //an array that holds a variable for the fitness evaluation and the schedule that is being evaluated                     //a variable that is incremented if there are professors that are needed be 2 or more different classes at the same time
         const allClassesCount = scheduleArray.length;
         for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length; currentClassIndex++){ //loop through all subjects to assign a default trait value of "dominant"
@@ -364,31 +319,21 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
                         }
                         //check time conflict
                         if(isSameDay(currentSubject,subjectComparedTo) && isSameSection(currentSubject,subjectComparedTo) && isOverLapping(currentSubject,subjectComparedTo)){
-                            // if(!currentSubject.issues.includes("time_conflict") && !isNSTP(currentSubject)){
-                            //     currentSubject.issues.push("time_conflict")
-                            // }
-                            // currentSubject.trait = "recessive";
                             if(!subjectComparedTo.issues.includes("time_conflict")) subjectComparedTo.issues.push("time_conflict");
                             subjectComparedTo.trait = "recessive";
-                            // console.log("has time conflict!")
                         }
                         //check professor conflict
                         if(isProfConflict(currentSubject,subjectComparedTo)){
-                            // if(!currentSubject.issues.includes("professor_conflict")) currentSubject.issues.push("professor_conflict");
-                            // currentSubject.trait = "recessive";
-                            // currentSubject.conflictWith.push({day: subjectComparedTo.day ,startTime:subjectComparedTo.startTime.slot,subject_code:subjectComparedTo.subject_code, section:subjectComparedTo.section});
                             if(!subjectComparedTo.issues.includes("professor_conflict")) subjectComparedTo.issues.push("professor_conflict");
                             subjectComparedTo.trait = "recessive";
-                            // subjectComparedTo.conflictWith.push({day: currentSubject.day ,startTime:currentSubject.startTime.slot,subject_code:currentSubject.subject_code, section:currentSubject.section});
                         }
                         // check room conflict
                         if(isSameF2F(currentSubject,subjectComparedTo) && isSameDay(currentSubject,subjectComparedTo) && isSameRoom(currentSubject,subjectComparedTo) && isOverLapping(currentSubject,subjectComparedTo)){
-                            // if(!currentSubject.issues.includes("room_conflict")) currentSubject.issues.push("room_conflict");
-                            // currentSubject.trait = "recessive";
                             if(!subjectComparedTo.issues.includes("room_conflict")) subjectComparedTo.issues.push("room_conflict");
                             subjectComparedTo.trait = "recessive";
                         }
                     }
+
                     //NSTP Checker
                     if(isNSTP(currentSubject) && currentSubject.day!==nstpTargetDay){
                         if(!currentSubject.issues.includes("weekday_NSTP")) currentSubject.issues.push("weekday_NSTP");
@@ -426,21 +371,15 @@ const evaluatePopulation = (approvedSchedArr,schedPopulation,config) => {   //th
 
 const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) => {           //this function splices the genomes of the best schedule - 2 at a time
     let crossOveredSched = [];
-    // console.log(`Crossover initial:`);
-    // console.log(evaluatePopulation(approvedSchedArr,schedule).sort((a,b)=>b.fitness-a.fitness));
     //TO-DO
     //get the top half of the sorted array - RESOLVED!
     //create an operation that that creates an offspring of the top half from the previous operation - RESOLVED!
     
     //Eugenics Operator
     if(stagnationCounter%50===0 && stagnationCounter > 0){
-        // console.log("Starting Eugenics");
         let bestHalfArr = [];
         let sortedSchedArray = evaluatePopulation(approvedSchedArr,schedule,config).sort((a,b)=>b.fitness-a.fitness);
-
-        // console.log(sortedSchedArray);
         let bestHalf = sortedSchedArray.slice(0,sortedSchedArray.length/2);
-    
         bestHalf.forEach(evaluatedSched=>{      // the first half of the new population will the be the best half of the previous population
             crossOveredSched.push(evaluatedSched.schedule);
         })
@@ -486,7 +425,6 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
             let parentA = firstHalf[schedCurrentIndex];
             let parentB = secondHalf[schedCurrentIndex];
             offSpringSchedule = [];
-            // console.log(`Parent A: ${parentA.length}, Parent B: ${parentB.length}`);
             for(let classCurrentIndex = 0; classCurrentIndex < parentA.length; classCurrentIndex++){
                 if(parentA[classCurrentIndex].trait=="dominant"){
                     offSpringSchedule.push(parentA[classCurrentIndex]);
@@ -508,7 +446,6 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
             crossOveredSched.push(offSpringSchedule);
         }
     }
-    // console.log(evaluatePopulation(approvedSchedArr,crossOveredSched).sort((a,b)=>b.fitness-a.fitness))
     return evaluatePopulation(approvedSchedArr,crossOveredSched,config).sort((a,b)=>b.fitness-a.fitness);
 }
 
@@ -516,7 +453,6 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
     const mutationProb = config.mutationProbability;
     const enableReassign = config.enableProfessorReassignment;
     const enableVarProf = config.enableVariedProfessors;
-    // const roomsToBeUsed = new Rooms(roomsArray);
     let selectedClass;
     schedPopulation.forEach(selectedSched=>{
         for(let selectedClassIndex = 0; selectedClassIndex < selectedSched.length; selectedClassIndex++){
@@ -536,28 +472,7 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
                 //reroll Room
                 if(Math.random() < mutationProb && selectedClass.issues.includes("room_conflict")){
                     if(selectedClass.session=="f2f"){
-                        // let roomsArray = [];
                         let chosenRoom;
-                        // switch(selectedClass.classType.slice(-3)){ // this needs to have its own function
-                        //     case "lec":
-                        //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(selectedClass.classType).rooms;
-                        //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                        //         break;
-                        //     case "lab":
-                        //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(selectedClass.classType).rooms;
-                        //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                        //         break;
-                        //     case "gym":
-                        //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(selectedClass.classType).rooms;
-                        //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
-                        //         break;
-                        //     case "outdoor":
-                        //         chosenRoom = "TBA";
-                        //         break;
-                        //     default:
-                        //         chosenRoom = "TBA"
-                        //         break;
-                        // }
                         chosenRoom = assignRoom(selectedClass,roomsArray)
                         selectedClass.room = chosenRoom;
                     }
@@ -681,8 +596,6 @@ export const geneticAlgorithm = (roomsArray,department,prepdSubjects,approvedSch
     return fittestSched.schedule;
 }
 
-
-
 //utility/non-GA functions section
 const addProfessorDailyLoad = (professorsArray) => {            //a function that attaches a variable to hold the number of time that a professor can spend per day and a variable to hold a priority value
 
@@ -736,10 +649,6 @@ const isOverLapping = (classObjA,classObjB) => {
     const upperLimA = classObjA.endTime.slot;
     const lowerLimB = classObjB.startTime.slot;
     const upperLimB = classObjB.endTime.slot;
-    // if(lowerLimA<= lowerLimB && upperLimA > lowerLimB) return true;
-    // else if(lowerLimA >= lowerLimB && lowerLimA<upperLimB) return true;
-    // else if(lowerLimA < lowerLimB && upperLimA > upperLimB) return true;
-    // else if(lowerLimA >= upperLimB) return false;
 
     if(upperLimA <= lowerLimB || lowerLimA >= upperLimB) return false;
     else return true;
@@ -802,7 +711,6 @@ const isLab = (classObj) => {
     }
 }
 
-
 const assignRoom = (classObj,roomsArray) => {
     let roomsToBeUsed = new Rooms(roomsArray);
     let roomsPool = [];
@@ -823,13 +731,6 @@ const assignRoom = (classObj,roomsArray) => {
             return "TBA";
     }
 }
-// const isRoomTBA = (classObj) => {
-//     return classObj.room === "TBA" ? true : false;
-// }
-
-// const isBothRoomTBA = (classObjA,classObjB) => {
-//     return classObjA.room === "TBA" && classObjB.room === "TBA" ? true : false;
-// }
 
 const isGym = (classObj) => {
     switch(classObj.classType){
@@ -876,6 +777,18 @@ export const checkForConflicts = (schedArr,editedClassObj) => {
         }
     })
     return conflitSubjects; //if the contents of this array is one or more, the edited subject as a conflict with active/approved sched. Else, it has no conflict
+}
+
+export const fetchData = async (jsonData) => {
+    try{
+        const response = await fetch(jsonData);
+        return await response.json();
+    }
+    catch(error){
+        console.log(error)
+        return [];
+    }
+
 }
 
 //utility / last resort algos

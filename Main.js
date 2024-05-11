@@ -4,7 +4,8 @@ import { constructGroupingsbyDepartment,
         geneticAlgorithm,
         getAllSubjects,
         assignProfessorToSubjects,
-        subjectSessionPrep } from "./GA.js";
+        subjectSessionPrep,
+        fetchData } from "./GA.js";
 import { professors } from "./Professors.js";
 import { department } from "./Department.js";
 import { config } from "./config.js";

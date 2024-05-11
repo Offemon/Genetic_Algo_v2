@@ -647,8 +647,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
         if(fittestSched.fitness < currentGeneration[0].fitness){
             fittestSched = currentGeneration[0];
             if(fittestSched.fitness===1){
-                console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
-                console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
+                // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
+                // console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
                 return fittestSched;
             }
             stagnationCounter=0;
@@ -657,8 +657,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
             stagnationCounter++
         }
         newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
-        console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
-        console.log("Fittest Sched: ", fittestSched);
+        // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
+        // console.log("Fittest Sched: ", fittestSched);
     }
     // let nthGeneration = 1;
     // while(fittestSched.fitness != 1){                                                                           //loop that only stops when it finds a 100% fitness schedule
@@ -696,7 +696,14 @@ const fisherYatesShuffler = (array) => {                        //a function tha
     return array;
 }
 
-export const constructGroupingsbyDepartment = (department,overallSchedArray) => {
+export const constructGroupingsbyDepartment = (department,overallSchedArray,config) => {
+    let activeSem = "";
+    if(config.semester===1){
+        activeSem = "1st Semester";
+    }
+    else if(config.semester===2){
+        activeSem = "2nd Semester";
+    }
     let structuredSchedule = [];
     department.forEach(course=>{
         let courseName = course.courseName;
@@ -705,7 +712,7 @@ export const constructGroupingsbyDepartment = (department,overallSchedArray) => 
             let levelName = level.level;
             let groupByLevel = [];
             level.sections.forEach(section=>{
-                groupByLevel.push({sectionName:section, classes: overallSchedArray.filter(classGroup=>classGroup.section===section)});
+                groupByLevel.push({sectionName:section,semester:activeSem ,classes: overallSchedArray.filter(classGroup=>classGroup.section===section)});
             })
             groupByCourse.push({level: levelName, sections:groupByLevel});
         })

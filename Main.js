@@ -31,7 +31,7 @@ const config =
     enableProfessorReassignment: true,      //configuration if the algorithm is allowed to change professors for each subject
     enableVariedProfessors: false,           //configuration if the algorithm is allowed to assign different professors for different sections but for the same subject
     populationSize: 500,                      //configuration for the population size.POPULATION SIZE MUST BE PERFECTLY DIVISIBLE BY 4.Recommended popsize is 500 for performance
-    maxGenerations: 1,                      //configuration for the minimum number of generations
+    maxGenerations: 100,                      //configuration for the minimum number of generations
     mutationProbability:0.05,                //configuration for the mutation probability. recommended value is 0.05;
     sessionImplementation: "hybrid",         //configuration whether the schedule is purely f2f, purely online, or hybrid
     nstpTargetDay: "saturday",              //NSTP Target Day
@@ -48,7 +48,7 @@ let chosenSched = geneticAlgorithm(rooms,department,prepdSubjects,approvedSchedA
 //Create a contingency function that will try to resolve the remaining recessive classes
 //using a greedy algorithm as a last resort: Best fit Algorithm
 
-console.log(constructGroupingsbyDepartment(department,chosenSched));
+console.log(constructGroupingsbyDepartment(department,chosenSched,config));
 
 //Fitness ruleset in the fitness function needs constant and thorough refining.
 

@@ -13,7 +13,7 @@ export const curriculum = [
                 {subject_code:"VDG113",subject_name:"Visual Design Graphics", duration: 3, classType: "computer_lab", expertise_required:"Multimedia"},
                 {subject_code:"BP113",subject_name:"Basic Photography", duration: 3, classType: "lec", expertise_required:"Photography"},
                 {subject_code:"PE101",subject_name:"Physical Fitness 1", duration: 3, classType: "gym", expertise_required:"Physical Education"},
-                {subject_code:"NSTP1",subject_name:"National Service Training Program 1", duration: 3, classType: "out", expertise_required:"General Education"}
+                {subject_code:"NSTP1",subject_name:"National Service Training Program 1", duration: 3, classType: "outdoor", expertise_required:"General Education"}
             ],
             secondSemester:[
                 {subject_code:"GEC108",subject_name:"Ethics", duration: 3, classType: "lec", expertise_required:"Psychology"},
@@ -23,7 +23,7 @@ export const curriculum = [
                 {subject_code:"DA123",subject_name:"Digital Animation", duration: 3, classType: "computer_lab", expertise_required:"Animation"},
                 {subject_code:"HCH123",subject_name:"Human Computer Interaction", duration: 3, classType: "lec", expertise_required:"Computer Science"},
                 {subject_code:"PE102",subject_name:"Physical Fitness 2", duration: 3, classType: "gym", expertise_required:"Physical Education"},
-                {subject_code:"NSTP2",subject_name:"National Service Training Program 1", duration: 3, classType: "out", expertise_required:"General Education"}
+                {subject_code:"NSTP2",subject_name:"National Service Training Program 1", duration: 3, classType: "outdoor", expertise_required:"General Education"}
             ]
             },
             {level:"2nd_year",
@@ -96,7 +96,7 @@ export const curriculum = [
                 {subject_code:"CC113-2",subject_name:"Computer Programming 1", duration: 3, classType: "computer_lab", expertise_required:"Programming"},
                 {subject_code:"BP113",subject_name:"Basic Photography", duration: 3, classType: "lec", expertise_required:"Photography"},
                 {subject_code:"PE101",subject_name:"Physical Fitness 1", duration: 3, classType: "gym", expertise_required:"Physical Education"},
-                {subject_code:"NSTP1",subject_name:"National Service Training Program 1", duration: 3, classType: "out", expertise_required:"General Education"}
+                {subject_code:"NSTP1",subject_name:"National Service Training Program 1", duration: 3, classType: "outdoor", expertise_required:"General Education"}
             ],
             secondSemester:[
                 {subject_code:"GEC108",subject_name:"Ethics", duration: 3, classType: "lec", expertise_required:"Psychology"},
@@ -106,7 +106,7 @@ export const curriculum = [
                 {subject_code:"HC123",subject_name:"Intro. to Human Computer Interaction", duration: 3, classType: "computer_lab", expertise_required:"Computer Science"},
                 {subject_code:"VDG113",subject_name:"Visual Design Graphics", duration: 3, classType: "computer_lab", expertise_required:"Multimedia"},
                 {subject_code:"PE102",subject_name:"Physical Fitness 2", duration: 3, classType: "gym", expertise_required:"Physical Education"},
-                {subject_code:"NSTP2",subject_name:"National Service Training Program 1", duration: 3, classType: "out", expertise_required:"General Education"}
+                {subject_code:"NSTP2",subject_name:"National Service Training Program 1", duration: 3, classType: "outdoor", expertise_required:"General Education"}
             ]
             },
             {level:"2nd_year",
@@ -157,7 +157,7 @@ export const curriculum = [
                 {subject_code:"LIT102",subject_name:"Philippine Popular Culture", duration: 3, classType: "lec", expertise_required:"General Education"},
             ],
             secondSemester:[
-                {subject_code:"ITPRAC",subject_name:"Practicum (486 hours)", duration: 3, classType: "out", expertise_required:"Computer Science", isPracticum:true},
+                {subject_code:"ITPRAC",subject_name:"Practicum (486 hours)", duration: 3, classType: "outdoor", expertise_required:"Computer Science", isPracticum:true},
                 {subject_code:"SAP323",subject_name:"MIS with ERP (SAP B1)", duration: 3, classType: "computer_lab", expertise_required:"COmputer Science"},
                 {subject_code:"GEC109",subject_name:"Life and Works of Rizal", duration: 3, classType: "lec", expertise_required:"General Education"},
             ]

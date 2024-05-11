@@ -1,0 +1,1 @@
+export const approvedSchedArr = []; //Fetch an array of approved Schedule

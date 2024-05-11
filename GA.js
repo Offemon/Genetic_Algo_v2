@@ -215,7 +215,7 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                     //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
                                     //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
                                     //         break;
-                                    //     case "out":
+                                    //     case "outdoor":
                                     //         chosenRoom = "TBA";
                                     //         break;
                                     //     default:
@@ -251,7 +251,7 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                     //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(subject.classType).rooms;
                                     //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
                                     //         break;
-                                    //     case "out":
+                                    //     case "outdoor":
                                     //         chosenRoom = "TBA";
                                     //         break;
                                     //     default:
@@ -551,7 +551,7 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
                         //         roomsArray = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(selectedClass.classType).rooms;
                         //         chosenRoom = roomsArray[Math.floor(Math.random()*(roomsArray.length-1))];
                         //         break;
-                        //     case "out":
+                        //     case "outdoor":
                         //         chosenRoom = "TBA";
                         //         break;
                         //     default:
@@ -753,8 +753,8 @@ const isNSTP = (classObj)=>{
 const isSameRoom = (classObjA,classObjB) =>{
     const sameRoom = classObjA.room.room_no === classObjB.room.room_no ? true : false;
     const sameGym = classObjA.room.room_no != "gym" && classObjB.room.room_no != "gym" ? true : false;
-    const sameOut = classObjA.room.room_no != "out" && classObjB.room.room_no != "out" ? true : false;
-    return sameRoom && sameGym && sameOut ? true : false;
+    const sameoutdoor = classObjA.room.room_no != "outdoor" && classObjB.room.room_no != "outdoor" ? true : false;
+    return sameRoom && sameGym && sameoutdoor ? true : false;
 }
 
 const isSameProfessor = (classObjA,classObjB) => {
@@ -817,7 +817,7 @@ const assignRoom = (classObj,roomsArray) => {
         case "gym":
             roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
             return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
-        case "out":
+        case "outdoor":
             return "TBA";
         default:
             return "TBA";

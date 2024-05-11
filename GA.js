@@ -94,6 +94,10 @@ const subjectSessionPrep = (subjectArray,config) => {                  //a funct
                 newsubjectArray.push({...subject,session:"async",duration:1.5,series:series+1});
                 series+=2;
             }
+            else if(subject.classType==="gym"){
+                newsubjectArray.push({...subject,session:"f2f",duration:2,series:series});
+                series++;
+            }
             else{
                 newsubjectArray.push({...subject,session:"f2f",duration:3,series:series});
                 series++;
@@ -115,6 +119,10 @@ const subjectSessionPrep = (subjectArray,config) => {                  //a funct
                 newsubjectArray.push({...subject,session:"f2f",duration:1.5,series:series+1, partition:"b"});
                 series+=2;
             }
+            else if(subject.classType==="gym"){
+                newsubjectArray.push({...subject,session:"f2f",duration:2,series:series, partition:"a"});
+                series++;
+            }
             else{
                 newsubjectArray.push({...subject,session:"f2f",duration:3,series:series, partition:"a"});
                 series++;
@@ -135,6 +143,10 @@ const subjectSessionPrep = (subjectArray,config) => {                  //a funct
                 newsubjectArray.push({...subject,session:"sync",duration:3,series:series});
                 newsubjectArray.push({...subject,session:"async",duration:1.5,series:series+1});
                 series+=2;
+            }
+            else if(subject.classType==="gym"){
+                newsubjectArray.push({...subject,session:"sync",duration:2,series:series});
+                series++;
             }
             else{
                 newsubjectArray.push({...subject,session:"sync",duration:3,series:series});
@@ -265,7 +277,7 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                             }
                         });
                     });
-                    overAllSched.push(...sectionLevelSched.sort((a,b)=>a.series-b.series)); //sorting the section-level sched is important during the crossover operation
+                    overAllSched.push(...(sectionLevelSched.sort((a,b)=>a.series-b.series))); //sorting the section-level sched is important during the crossover operation
                 });
             });
         });
@@ -279,7 +291,7 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
         const nstpTargetDay = config.nstpTargetDay;
         const nstpTargetStartTime = config.nstpTargetStartTime;
         let dominantClasses;
-        const inportedScheduleArray = [];
+        // const inportedScheduleArray = approvedSchedArr;
         //criterias:
         //NSTP classes should be on Saturdays and starts at 7am
         //No two or more classes of share the same classroom at the same time
@@ -420,6 +432,7 @@ const crossOverFunction = (schedule,stagnationCounter,config) => {           //t
     //Eugenics Operator
     if(stagnationCounter%50===0 && stagnationCounter > 0){
         // console.log("Starting Eugenics");
+        let bestHalfArr = [];
         let sortedSchedArray = evaluatePopulation(approvedSchedArr,schedule,config).sort((a,b)=>b.fitness-a.fitness);
 
         // console.log(sortedSchedArray);
@@ -729,8 +742,8 @@ const isNSTP = (classObj)=>{
 
 const isSameRoom = (classObjA,classObjB) =>{
     const sameRoom = classObjA.room.room_no === classObjB.room.room_no ? true : false;
-    const sameGym = classObjA.room.room_no != "gym" && classObjA.room.room_no != "gym" ? true : false;
-    const sameOut = classObjA.room.room_no != "out" && classObjA.room.room_no != "out" ? true : false;
+    const sameGym = classObjA.room.room_no != "gym" && classObjB.room.room_no != "gym" ? true : false;
+    const sameOut = classObjA.room.room_no != "out" && classObjB.room.room_no != "out" ? true : false;
     return sameRoom && sameGym && sameOut ? true : false;
 }
 
@@ -824,6 +837,37 @@ const isSameLevel = (classObjA,classObjB) => {
 const hasTargetTimeAndDate = (classObj,targetTimeSlot, targetDay) => {
     return classObj.startTime.slot == targetTimeSlot && classObj.day === targetDay ? true : false;
 }
+
+const checkForConflicts = (schedArr,editedClassObj) => {
+    let conflitSubjects = [];
+    schedArr.forEach(selectedClassObj => {
+        if(isSameSection(selectedClassObj,editedClassObj) && isSameSubject(selectedClassObj,editedClassObj)){
+            let hasConflict = false;
+
+            //check time conflict
+            if(isSameDay(selectedClassObj,editedClassObj) && isSameSection(selectedClassObj,editedClassObj) && isOverLapping(currentSubject,editedClassObj)){
+                hasConflict = true;
+            }
+
+            //check professor conflict
+            if(isProfConflict(selectedClassObj,editedClassObj)){
+                hasConflict = true;
+            }
+
+            // check room conflict
+            if(isSameF2F(selectedClassObj,editedClassObj) && isSameDay(selectedClassObj,editedClassObj) && isSameRoom(selectedClassObj,editedClassObj) && isOverLapping(selectedClassObj,editedClassObj)){
+                hasConflict = true;
+            }
+
+            //adds the classes that are in conflict with the edited classes
+            if(hasConflict===true){
+                conflitSubjects.push(selectedClassObj);
+            }
+        }
+    })
+    return conflitSubjects; //if the contents of this array is one or more, the edited subject as a conflict with active/approved sched. Else, it has no conflict
+}
+
 //utility / last resort algos
 const tabulateSchedule = (selectedSchedule) => {
 

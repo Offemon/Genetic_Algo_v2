@@ -512,12 +512,12 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
                 //reroll Professor
                 if((Math.random() < mutationProb) && enableReassign && (selectedClass.issues.includes("professor_conflict"))){
                     let subject_code = selectedClass.subject_code;
-                    let section = selectedClass.section;
+                    let section = selectedClass.sectionAlias;
                     let classDay = selectedClass.day;
                     let requiredExpertise = selectedClass.expertise_required;
                     let classesAffected;
                     if(enableVarProf){
-                        classesAffected = selectedSched.filter(selectedClasses => selectedClasses.subject_code == subject_code && selectedClasses.section === section);
+                        classesAffected = selectedSched.filter(selectedClasses => selectedClasses.subject_code == subject_code && selectedClasses.sectionAlias === section);
                     }
                     else{
                         classesAffected = selectedSched.filter(selectedClasses => selectedClasses.subject_code == subject_code);
@@ -579,8 +579,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
         if(fittestSched.fitness < currentGeneration[0].fitness){
             fittestSched = currentGeneration[0];
             if(fittestSched.fitness===1){
-                // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
-                // console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
+                console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
+                console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
                 return fittestSched;
             }
             stagnationCounter=0;
@@ -589,8 +589,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
             stagnationCounter++
         }
         newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
-        // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
-        // console.log("Fittest Sched: ", fittestSched);
+        console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
+        console.log("Fittest Sched: ", fittestSched);
     }
     // let nthGeneration = 1;
     // while(fittestSched.fitness != 1){                                                                           //loop that only stops when it finds a 100% fitness schedule

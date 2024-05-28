@@ -12,7 +12,7 @@ import { config } from "./config.js";
 import { approvedSchedArr } from "./ApprovedSched.js";
 
 export const userDepartment = "CCS";
-
+// console.time("Time Elapsed");
 const allSubjects = getAllSubjects(department,config);
 let subjWithProfArray = assignProfessorToSubjects(professors,allSubjects);
 let prepdSubjects = subjectSessionPrep(subjWithProfArray,config);
@@ -24,6 +24,7 @@ let chosenSched = geneticAlgorithm(rooms,department,prepdSubjects,approvedSchedA
 //using a greedy algorithm as a last resort: Best fit Algorithm
 
 console.log(constructGroupingsbyDepartment(department,chosenSched,config));
-
+// console.log(chosenSched)
+// console.timeEnd("Time Elapsed")
 //Fitness ruleset in the fitness function needs constant and thorough refining.
 

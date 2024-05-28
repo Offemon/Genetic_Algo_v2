@@ -172,20 +172,24 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
     let currentLevel;
     let currentDay;
     let chosenRoom;
+    let sectionCounter;
+    let sectionAlias="";
     let days = ["monday","tuesday","wednesday","thursday","friday","saturday"]
     for(let popCounter = 0; popCounter < popSize; popCounter++){
         overAllSched = [];
-        departmentArray.forEach(course=>{
+        departmentArray.forEach((course,courseIndex)=>{
             currentCourse = course.courseName;
             levelSched = [];
-            course.levels.forEach(level=>{
+            course.levels.forEach((level,levelIndex)=>{
                 currentLevel = level.level;
-                level.sections.forEach(section=>{
+                level.sections.forEach((section,sectionIndex)=>{
+                    sectionCounter = 1;
                     sectionLevelSched = [];
                     currentSection = section;
                     prepdSubjectsArray.filter(subject=>subject.course == currentCourse).forEach(subject=>{
                         subject.assigned=false;
                     })
+                    sectionAlias = assignSectionAlias(currentCourse,currentLevel,sectionCounter);
                     fisherYatesShuffler(days).forEach(day=>{
                         const maximumSchoolHoursPerDay = 7;
                         let totalDailyHour = 0;
@@ -204,7 +208,7 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                 startTime = time.find(slot=>slot.slot==timeSlot);
                                 endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
                                 subject.assigned = true;
-                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime});
+                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
                                 totalDailyHour++;
                             }
                         });
@@ -220,7 +224,7 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                 startTime = time.find(slot=>slot.slot==timeSlot);
                                 endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
                                 subject.assigned = true;
-                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime});
+                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
                                 totalDailyHour++;
                             }
                         });
@@ -231,10 +235,11 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                                 startTime = time.find(slot=>slot.slot==timeSlot);
                                 endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
                                 subject.assigned = true;
-                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime});
+                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
                                 totalDailyHour++;
                             }
                         });
+                        sectionCounter++;
                     });
                     overAllSched.push(...(sectionLevelSched.sort((a,b)=>a.series-b.series))); //sorting the section-level sched is important during the crossover operation
                 });
@@ -249,6 +254,7 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
         const implementationType = config.sessionImplementation;
         const nstpTargetDay = config.nstpTargetDay;
         const nstpTargetStartTime = config.nstpTargetStartTime;
+        const scheduleArrayLen = scheduleArray.length;
         let dominantClasses;
         //criterias:
         //NSTP classes should be on Saturdays and starts at 7am
@@ -258,18 +264,19 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
         //this function should assign whether a single class is considered recessive or dominant
         let evaluatedSchedule;                          //an array that holds a variable for the fitness evaluation and the schedule that is being evaluated                     //a variable that is incremented if there are professors that are needed be 2 or more different classes at the same time
         const allClassesCount = scheduleArray.length;
-        for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length; currentClassIndex++){ //loop through all subjects to assign a default trait value of "dominant"
+        for(let currentClassIndex = 0; currentClassIndex< scheduleArrayLen; currentClassIndex++){ //loop through all subjects to assign a default trait value of "dominant"
             scheduleArray[currentClassIndex].trait = "dominant";
             scheduleArray[currentClassIndex].issues = [];
-            scheduleArray[currentClassIndex].conflictWith = [];
+            // scheduleArray[currentClassIndex].conflictWith = [];
         }
 
         if(approvedSchedArr.length>0 || approvedSchedArr != null){
             let currentSubject;
             let subjectComparedTo;
-            for(let currApprovedSchedClassIndex = 0; currApprovedSchedClassIndex < approvedSchedArr.length; currApprovedSchedClassIndex++){
+            const approvedSchedArrLen = approvedSchedArr.length;
+            for(let currApprovedSchedClassIndex = 0; currApprovedSchedClassIndex < approvedSchedArrLen; currApprovedSchedClassIndex++){
                 currentSubject = approvedSchedArr[currApprovedSchedClassIndex];
-                for(let schedArrIndex = 0; schedArrIndex < scheduleArray.length; schedArrIndex++){
+                for(let schedArrIndex = 0; schedArrIndex < scheduleArrayLen; schedArrIndex++){
                     subjectComparedTo = scheduleArray[schedArrIndex];
                     
                     //check professor conflict
@@ -288,7 +295,7 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
         }
 
         
-        for(let currentClassIndex = 0; currentClassIndex< scheduleArray.length; currentClassIndex++){
+        for(let currentClassIndex = 0; currentClassIndex< scheduleArrayLen; currentClassIndex++){
             let currentSubject = scheduleArray[currentClassIndex];
 
             //check if PE and Lab subjects starts too late in the afternoon.
@@ -300,7 +307,7 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
                 }
             }
             if(currentSubject.trait == "dominant"){
-                for(let comparedToIndex = currentClassIndex+1; comparedToIndex<scheduleArray.length;comparedToIndex++){
+                for(let comparedToIndex = currentClassIndex+1; comparedToIndex<scheduleArrayLen;comparedToIndex++){
                     let subjectComparedTo = scheduleArray[comparedToIndex]
                     if(!isNSTP(currentSubject) && !isNSTP(subjectComparedTo)){
 
@@ -378,17 +385,20 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
     //Eugenics Operator
     if(stagnationCounter%50===0 && stagnationCounter > 0){
         let bestHalfArr = [];
+        let bestHalfArrLength = 0;
         let sortedSchedArray = evaluatePopulation(approvedSchedArr,schedule,config).sort((a,b)=>b.fitness-a.fitness);
         let bestHalf = sortedSchedArray.slice(0,sortedSchedArray.length/2);
         bestHalf.forEach(evaluatedSched=>{      // the first half of the new population will the be the best half of the previous population
             crossOveredSched.push(evaluatedSched.schedule);
         })
         bestHalfArr=bestHalf.map(evaluatedSched=>evaluatedSched.schedule);
-        for(let schedCurrentIndex = 0;schedCurrentIndex<bestHalfArr.length;schedCurrentIndex+=2){     //this loop will generate a new population but the dominant traits are in favor of Parent A
+        bestHalfArrLength = bestHalfArr.length;
+        for(let schedCurrentIndex = 0;schedCurrentIndex<bestHalfArrLength;schedCurrentIndex+=2){     //this loop will generate a new population but the dominant traits are in favor of Parent A
             let parentA = bestHalfArr[schedCurrentIndex];
             let parentB = bestHalfArr[schedCurrentIndex+1];
+            let parentALen = parentA.length;
             let offSpringSchedule = [];
-            for(let classCurrentIndex=0;classCurrentIndex<parentA.length;classCurrentIndex++){
+            for(let classCurrentIndex=0;classCurrentIndex<parentALen;classCurrentIndex++){
                 if(parentA[classCurrentIndex].trait=="dominant"){
                     offSpringSchedule.push(parentA[classCurrentIndex]);
                 }
@@ -399,11 +409,12 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
             crossOveredSched.push(offSpringSchedule);
         }
     
-        for(let schedCurrentIndex = 0;schedCurrentIndex<bestHalfArr.length;schedCurrentIndex+=2){     //this loop will generate a new population but the dominant traits are in favor of Parent B
+        for(let schedCurrentIndex = 0;schedCurrentIndex<bestHalfArrLength;schedCurrentIndex+=2){     //this loop will generate a new population but the dominant traits are in favor of Parent B
             let parentA = bestHalfArr[schedCurrentIndex];
             let parentB = bestHalfArr[schedCurrentIndex+1];
+            let parentBLen = parentB.length;
             let offSpringSchedule = [];
-            for(let classCurrentIndex=0;classCurrentIndex<parentB.length;classCurrentIndex++){
+            for(let classCurrentIndex=0;classCurrentIndex<parentBLen;classCurrentIndex++){
                 if(parentB[classCurrentIndex].trait=="dominant"){
                     offSpringSchedule.push(parentB[classCurrentIndex]);
                 }
@@ -421,11 +432,16 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
         const midIndex = Math.ceil(schedule.length/2);
         let firstHalf = evaluatePopulation(approvedSchedArr,schedule.slice(0,midIndex),config).sort((a,b)=>b.fitness-a.fitness).map(sched=>sched.schedule);
         let secondHalf = evaluatePopulation(approvedSchedArr,schedule.slice(midIndex),config).sort((a,b)=>a.fitness-b.fitness).map(sched=>sched.schedule);
-        for(let schedCurrentIndex = 0; schedCurrentIndex < firstHalf.length; schedCurrentIndex++){
+        const firstHalfLen = firstHalf.length;
+        // const secondHalfLen = secondHalf.length;
+
+        for(let schedCurrentIndex = 0; schedCurrentIndex < firstHalfLen; schedCurrentIndex++){
             let parentA = firstHalf[schedCurrentIndex];
             let parentB = secondHalf[schedCurrentIndex];
+            let parentALen = parentA.length;
+            let parentBLen = parentB.length;
             offSpringSchedule = [];
-            for(let classCurrentIndex = 0; classCurrentIndex < parentA.length; classCurrentIndex++){
+            for(let classCurrentIndex = 0; classCurrentIndex < parentALen; classCurrentIndex++){
                 if(parentA[classCurrentIndex].trait=="dominant"){
                     offSpringSchedule.push(parentA[classCurrentIndex]);
                 }
@@ -435,7 +451,7 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
             }
             crossOveredSched.push(offSpringSchedule);
             offSpringSchedule=[];
-            for(let classCurrentIndex = 0; classCurrentIndex < parentA.length; classCurrentIndex++){
+            for(let classCurrentIndex = 0; classCurrentIndex < parentBLen; classCurrentIndex++){
                 if(parentB[classCurrentIndex].trait=="dominant"){
                     offSpringSchedule.push(parentB[classCurrentIndex]);
                 }
@@ -455,7 +471,8 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
     const enableVarProf = config.enableVariedProfessors;
     let selectedClass;
     schedPopulation.forEach(selectedSched=>{
-        for(let selectedClassIndex = 0; selectedClassIndex < selectedSched.length; selectedClassIndex++){
+        const selectedSchedLength = selectedSched.length
+        for(let selectedClassIndex = 0; selectedClassIndex < selectedSchedLength; selectedClassIndex++){
             selectedClass = selectedSched[selectedClassIndex];
             if(selectedClass.trait==="recessive"){
                 //reroll time
@@ -602,7 +619,8 @@ const addProfessorDailyLoad = (professorsArray) => {            //a function tha
 }
 
 const fisherYatesShuffler = (array) => {                        //a function that uses Fisher-Yates algorithm to shuffle an array
-    for (let i = array.length-1; i> 0; i--){
+    const arrLen = array.length
+    for (let i = arrLen-1; i> 0; i--){
         const randomIndex = Math.floor(Math.random()*(i+1));
         [array[i],array[randomIndex]]=[array[randomIndex],array[i]]
     }
@@ -661,9 +679,9 @@ const isNSTP = (classObj)=>{
 
 const isSameRoom = (classObjA,classObjB) =>{
     const sameRoom = classObjA.room.room_no === classObjB.room.room_no ? true : false;
-    const sameGym = classObjA.room.room_no != "gym" && classObjB.room.room_no != "gym" ? true : false;
-    const sameoutdoor = classObjA.room.room_no != "outdoor" && classObjB.room.room_no != "outdoor" ? true : false;
-    return sameRoom && sameGym && sameoutdoor ? true : false;
+    const bothNotGym = classObjA.room.room_no != "gym" && classObjB.room.room_no != "gym" ? true : false;
+    const bothNotOutdoor = classObjA.room.room_no != "outdoor" && classObjB.room.room_no != "outdoor" ? true : false;
+    return sameRoom && bothNotGym && bothNotOutdoor ? true : false;
 }
 
 const isSameProfessor = (classObjA,classObjB) => {
@@ -675,7 +693,8 @@ const isSameDay = (classObjA,classObjB) => {
 }
 
 const isSameSection = (classObjA,classObjB) => {
-    return classObjA.section === classObjB.section ? true : false;
+    // return classObjA.section === classObjB.section ? true : false;
+    return classObjA.sectionAlias === classObjB.sectionAlias ? true : false;
 }
 
 const isSameF2F = (classObjA,classObjB) =>{
@@ -789,6 +808,10 @@ export const fetchData = async (jsonData) => {
         return [];
     }
 
+}
+
+const assignSectionAlias = (course, level, sectioncounter) => {
+    return course+"-"+level+"-"+sectioncounter;
 }
 
 //utility / last resort algos

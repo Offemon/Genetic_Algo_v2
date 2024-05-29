@@ -370,18 +370,18 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
 
 const evaluatePopulation = (approvedSchedArr,schedPopulation,config) => {   //this function evaluates an entire generated population of schedules and returns a spreaded classes with fitness values attached to each schedule
     let evaluatedPopulation = [];
-    schedPopulation.forEach(sched=>{
-        evaluatedPopulation.push(fitnessFunction(approvedSchedArr,sched,config));
-    })
+    let schedPopulationLen = schedPopulation.length;
+    // schedPopulation.forEach(sched=>{
+    //     evaluatedPopulation.push(fitnessFunction(approvedSchedArr,sched,config));
+    // })
+    for(let schedIndex = 0; schedIndex<schedPopulationLen;schedIndex++){
+        evaluatedPopulation.push(fitnessFunction(approvedSchedArr,schedPopulation[schedIndex],config))
+    }
     return evaluatedPopulation;
 }
 
 const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) => {           //this function splices the genomes of the best schedule - 2 at a time
     let crossOveredSched = [];
-    //TO-DO
-    //get the top half of the sorted array - RESOLVED!
-    //create an operation that that creates an offspring of the top half from the previous operation - RESOLVED!
-    
     //Eugenics Operator
     if(stagnationCounter%50===0 && stagnationCounter > 0){
         let bestHalfArr = [];
@@ -495,7 +495,6 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
                     }
 
                 }
-                //t2 desperation
                 //reroll day
                 if((Math.random() < mutationProb)){
                     if(selectedClass.professor!=="TBA"){
@@ -579,8 +578,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
         if(fittestSched.fitness < currentGeneration[0].fitness){
             fittestSched = currentGeneration[0];
             if(fittestSched.fitness===1){
-                console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
-                console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
+                // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
+                // console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
                 return fittestSched;
             }
             stagnationCounter=0;
@@ -589,8 +588,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
             stagnationCounter++
         }
         newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
-        console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
-        console.log("Fittest Sched: ", fittestSched);
+        // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
+        // console.log("Fittest Sched: ", fittestSched);
     }
     // let nthGeneration = 1;
     // while(fittestSched.fitness != 1){                                                                           //loop that only stops when it finds a 100% fitness schedule
@@ -680,7 +679,7 @@ const isNSTP = (classObj)=>{
 const isSameRoom = (classObjA,classObjB) =>{
     const sameRoom = classObjA.room.room_no === classObjB.room.room_no ? true : false;
     const bothNotGym = classObjA.room.room_no != "gym" && classObjB.room.room_no != "gym" ? true : false;
-    const bothNotOutdoor = classObjA.room.room_no != "outdoor" && classObjB.room.room_no != "outdoor" ? true : false;
+    const bothNotOutdoor = classObjA.room != "TBA" && classObjB.room != "TBA" ? true : false;
     return sameRoom && bothNotGym && bothNotOutdoor ? true : false;
 }
 
@@ -733,21 +732,31 @@ const isLab = (classObj) => {
 const assignRoom = (classObj,roomsArray) => {
     let roomsToBeUsed = new Rooms(roomsArray);
     let roomsPool = [];
-    switch(classObj.classType.slice(-3)){ // this needs to have its own function
-        case "lec":
-            roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
+    // switch(classObj.classType.slice(-3)){ // this needs to have its own function
+    //     case "lec":
+    //         roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
+    //         return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
+    //     case "lab":
+    //         roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
+    //         return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
+    //     case "gym":
+    //         roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
+    //         return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
+    //     case "outdoor":
+    //         return "TBA";
+    //     default:
+    //         return "TBA";
+    // }
+    try {
+        roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
+        if(roomsPool.length===0){
+            return "TBA"
+        }
+        else{
             return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
-        case "lab":
-            roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
-            // console.log(roomsPool)
-            return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
-        case "gym":
-            roomsPool = roomsToBeUsed.fetchEnabledRooms().fetchRoomsByType(classObj.classType).rooms;
-            return roomsPool[Math.floor(Math.random()*(roomsPool.length-1))];
-        case "outdoor":
-            return "TBA";
-        default:
-            return "TBA";
+        }
+    } catch (error) {
+        return "TBA"
     }
 }
 
@@ -769,10 +778,10 @@ const hasTargetTimeAndDate = (classObj,targetTimeSlot, targetDay) => {
 }
 
 export const checkForConflicts = (schedArr,editedClassObj) => {
-    let conflitSubjects = [];
+    let conflictSubjects = [];
     schedArr.forEach(selectedClassObj => {
-        if(isSameSection(selectedClassObj,editedClassObj) && isSameSubject(selectedClassObj,editedClassObj)){
-            let hasConflict = false;
+        let hasConflict = false;
+        if(!isSameSection(selectedClassObj,editedClassObj) && !isSameSubject(selectedClassObj,editedClassObj)){
 
             //check time conflict
             if(isSameDay(selectedClassObj,editedClassObj) && isSameSection(selectedClassObj,editedClassObj) && isOverLapping(currentSubject,editedClassObj)){
@@ -795,7 +804,7 @@ export const checkForConflicts = (schedArr,editedClassObj) => {
             }
         }
     })
-    return conflitSubjects; //if the contents of this array is one or more, the edited subject as a conflict with active/approved sched. Else, it has no conflict
+    return conflictSubjects; //if the contents of this array is one or more, the edited subject as a conflict with active/approved sched. Else, it has no conflict
 }
 
 export const fetchData = async (jsonData) => {
@@ -810,8 +819,8 @@ export const fetchData = async (jsonData) => {
 
 }
 
-const assignSectionAlias = (course, level, sectioncounter) => {
-    return course+"-"+level+"-"+sectioncounter;
+const assignSectionAlias = (course, level, sectionCounter) => {
+    return course+"-"+level+"-"+sectionCounter;
 }
 
 //utility / last resort algos

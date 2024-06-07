@@ -100,6 +100,13 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
                 newsubjectArray.push({...subject,session:"f2f",duration:2,series:series});
                 series++;
             }
+
+            else if(isNSTP(subject)){
+                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Civic Welfare and Training Service ${subject.subject_code.slice(-1)}`, nstpType:"cwts"});
+                series++;
+                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Reserve Officers' Training Corps ${subject.subject_code.slice(-1)}`, nstpType:"rotc"});
+                series++;
+            }
             else{
                 newsubjectArray.push({...subject,session:"f2f",duration:3,series:series});
                 series++;
@@ -122,6 +129,12 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
             }
             else if(subject.classType==="gym"){
                 newsubjectArray.push({...subject,session:"f2f",duration:2,series:series, partition:"a"});
+                series++;
+            }
+            else if(isNSTP(subject)){
+                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Civic Welfare and Training Service ${subject.subject_code.slice(-1)}`, nstpType:"cwts"});
+                series++;
+                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Reserve Officers' Training Corps ${subject.subject_code.slice(-1)}`, nstpType:"rotc"});
                 series++;
             }
             else{
@@ -148,6 +161,12 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
                 newsubjectArray.push({...subject,session:"sync",duration:2,series:series});
                 series++;
             }
+            else if(isNSTP(subject)){
+                newsubjectArray.push({...subject,session:"sync",duration:3,series:series,subject_name:`Civic Welfare and Training Service ${subject.subject_code.slice(-1)}`, nstpType:"cwts"});
+                series++;
+                newsubjectArray.push({...subject,session:"sync",duration:3,series:series,subject_name:`Reserve Officers' Training Corps ${subject.subject_code.slice(-1)}`, nstpType:"rotc"});
+                series++;
+            }
             else{
                 newsubjectArray.push({...subject,session:"sync",duration:3,series:series});
                 series++;
@@ -160,6 +179,13 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
 
 const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,config) => {  // returns a group classes by section
     const popSize = config.populationSize
+    const cwtsTargetDay = config.cwtsTargetDay;
+    const cwtsTargetStartTime = time.find(slot=>slot.slot==config.cwtsTargetStartTime);
+    const cwtsTargetEndTime = time.find(slot=>slot.slot==config.cwtsTargetStartTime+3);
+    const rotcTargetDay = config.rotcTargetDay;
+    const rotcTargetStartTime = time.find(slot=>slot.slot==config.rotcTargetStartTime);
+    const rotcTargetEndTime = time.find(slot=>slot.slot==config.rotcTargetStartTime+3);
+
     let initialPopulation = [];
     let overAllSched = [];
     let sectionLevelSched = [];
@@ -177,12 +203,12 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
     let days = ["monday","tuesday","wednesday","thursday","friday","saturday"]
     for(let popCounter = 0; popCounter < popSize; popCounter++){
         overAllSched = [];
-        departmentArray.forEach((course,courseIndex)=>{
+        departmentArray.forEach((course)=>{
             currentCourse = course.courseName;
             levelSched = [];
-            course.levels.forEach((level,levelIndex)=>{
+            course.levels.forEach((level)=>{
                 currentLevel = level.level;
-                level.sections.forEach((section,sectionIndex)=>{
+                level.sections.forEach((section)=>{
                     sectionCounter = 1;
                     sectionLevelSched = [];
                     currentSection = section;
@@ -195,37 +221,80 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                         let totalDailyHour = 0;
                         currentDay = day;
                         let unassignedSubjects = prepdSubjectsArray.filter(subject=>subject.assigned==false && subject.level == currentLevel && subject.course == currentCourse);
+                            
                         //Priorotize non async subjects with Part Time Professors
                         fisherYatesShuffler(unassignedSubjects.filter(subject=>subject.session!="async").filter(subject=>subject.professor.employment_type=="part-time").filter(subject=>subject.professor.availability.includes(currentDay))).forEach(subject=>{
                             if(totalDailyHour + subject.duration <= maximumSchoolHoursPerDay){
-                                if(subject.session=="sync"){
-                                    chosenRoom = "-"
+                                if(isNSTP(subject)){
+                                    chosenRoom = "TBA"
+                                    if(subject.nstpType==="cwts"){
+                                        day = cwtsTargetDay;
+                                        startTime = cwtsTargetStartTime;
+                                        endTime = cwtsTargetEndTime
+                                        subject.assigned = true;
+                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                        totalDailyHour++;
+                                    }
+                                    else{
+                                        day = rotcTargetDay;
+                                        startTime = rotcTargetStartTime;
+                                        endTime = rotcTargetEndTime
+                                        subject.assigned = true;
+                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                        totalDailyHour++;
+                                    }
                                 }
                                 else{
-                                    chosenRoom = assignRoom(subject,roomsArray);
+                                    if(subject.session=="sync"){
+                                        chosenRoom = "-"
+                                    }
+                                    else{
+                                        chosenRoom = assignRoom(subject,roomsArray);
+                                    }
+                                    timeSlot = time[Math.floor(Math.random()*(time.length-11))].slot;
+                                    startTime = time.find(slot=>slot.slot==timeSlot);
+                                    endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
+                                    subject.assigned = true;
+                                    sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                    totalDailyHour++;
                                 }
-                                timeSlot = time[Math.floor(Math.random()*(time.length-11))].slot;
-                                startTime = time.find(slot=>slot.slot==timeSlot);
-                                endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
-                                subject.assigned = true;
-                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
-                                totalDailyHour++;
                             }
                         });
                         fisherYatesShuffler(unassignedSubjects.filter(subject=>subject.session!="async").filter(subject=>subject.professor.employment_type=="full-time").filter(subject=>subject.professor.availability.includes(currentDay))).forEach(subject=>{
                             if(totalDailyHour + subject.duration <= maximumSchoolHoursPerDay){
-                                if(subject.session=="sync"){
-                                    chosenRoom = "-"
+                                if(isNSTP(subject)){
+                                    chosenRoom = "TBA"
+                                    if(subject.nstpType==="cwts"){
+                                        day = cwtsTargetDay;
+                                        startTime = cwtsTargetStartTime;
+                                        endTime = cwtsTargetEndTime
+                                        subject.assigned = true;
+                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                        totalDailyHour++;
+                                    }
+                                    else{
+                                        day = rotcTargetDay;
+                                        startTime = rotcTargetStartTime;
+                                        endTime = rotcTargetEndTime
+                                        subject.assigned = true;
+                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                        totalDailyHour++;
+                                    }
                                 }
                                 else{
-                                    chosenRoom = assignRoom(subject,roomsArray);
+                                    if(subject.session=="sync"){
+                                        chosenRoom = "-"
+                                    }
+                                    else{
+                                        chosenRoom = assignRoom(subject,roomsArray);
+                                    }
+                                    timeSlot = time[Math.floor(Math.random()*(time.length-11))].slot;
+                                    startTime = time.find(slot=>slot.slot==timeSlot);
+                                    endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
+                                    subject.assigned = true;
+                                    sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                    totalDailyHour++;
                                 }
-                                timeSlot = time[Math.floor(Math.random()*(time.length-11))].slot;
-                                startTime = time.find(slot=>slot.slot==timeSlot);
-                                endTime = time.find(slot=>slot.slot==(timeSlot+subject.duration));
-                                subject.assigned = true;
-                                sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
-                                totalDailyHour++;
                             }
                         });
                         fisherYatesShuffler(unassignedSubjects.filter(subject=>subject.session=="async")).forEach(subject=>{
@@ -252,8 +321,12 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
 
 const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //this function evaluates the fitness of a single generated schedule - NEEDS CONSTANT REFINING
         const implementationType = config.sessionImplementation;
-        const nstpTargetDay = config.nstpTargetDay;
-        const nstpTargetStartTime = config.nstpTargetStartTime;
+        // const nstpTargetDay = config.nstpTargetDay;
+        // const nstpTargetStartTime = config.nstpTargetStartTime;
+        // const cwtsTargetDay = config.cwtsTargetDay;
+        // const cwtsTargetStartTime = config.cwtsTargetStartTime;
+        // const rotcTargetDay = config.rotcTargetDay;
+        // const rotcTargetStartTime = config.rotcTargetStartTime;
         const scheduleArrayLen = scheduleArray.length;
         let dominantClasses;
         //criterias:
@@ -311,7 +384,7 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
                     let subjectComparedTo = scheduleArray[comparedToIndex]
                     if(!isNSTP(currentSubject) && !isNSTP(subjectComparedTo)){
 
-                        //check if there are subjects contesting with NSTP time slot.
+                        // check if there are subjects contesting with NSTP time slot.
                         if(currentSubject.level==="first_year" && currentSubject.day === nstpTargetDay && currentSubject.startTime.slot>nstpTargetStartTime+3){
                             if(!currentSubject.issues.includes("NSTP_conflict")){
                                 currentSubject.issues.push("NSTP_conflict");
@@ -342,19 +415,54 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
                     }
 
                     //NSTP Checker
-                    if(isNSTP(currentSubject) && currentSubject.day!==nstpTargetDay){
-                        if(!currentSubject.issues.includes("weekday_NSTP")) currentSubject.issues.push("weekday_NSTP");
-                        currentSubject.trait = "recessive";
-                    }
-                    if(isNSTP(currentSubject) && currentSubject.startTime.slot!==nstpTargetStartTime){
-                        if(!currentSubject.issues.includes("late_NSTP")) currentSubject.issues.push("late_NSTP");
-                        currentSubject.trait = "recessive";
-                    }
-                    if(isNSTP(currentSubject) && !isNSTP(subjectComparedTo)){
-                        if(isOverLapping(currentSubject,subjectComparedTo) && isSameLevel(currentSubject,subjectComparedTo)){
-                            subjectComparedTo.trait = "recessive";
-                        }
-                    }
+                    // if(isNSTP(currentSubject) && currentSubject.day!==nstpTargetDay){
+                    //     if(!currentSubject.issues.includes("missed_nstp_target_day")) currentSubject.issues.push("missed_nstp_target_day");
+                    //     currentSubject.trait = "recessive";
+                    // }
+                    // if(isNSTP(currentSubject) && currentSubject.startTime.slot!==nstpTargetStartTime){
+                    //     if(!currentSubject.issues.includes("missed_nstp_target_day")) currentSubject.issues.push("missed_nstp_target_day");
+                    //     currentSubject.trait = "recessive";
+                    // }
+                    // if(isNSTP(currentSubject) && !isNSTP(subjectComparedTo)){
+                    //     if(isOverLapping(currentSubject,subjectComparedTo) && isSameLevel(currentSubject,subjectComparedTo)){
+                    //         subjectComparedTo.trait = "recessive";
+                    //     }
+                    // }
+                    // CWTS Checker
+                    // if(isCWTS(currentSubject)){
+                    //     if(currentSubject.day!==cwtsTargetDay){
+                    //         if(!currentSubject.issues.includes("missed_cwts_target_day")) currentSubject.issues.push("missed_cwts_target_day");
+                    //         currentSubject.trait = "recessive";
+                    //     }
+                    //     if(currentSubject.startTime.slot!==cwtsTargetStartTime){
+                    //         if(!currentSubject.issues.includes("missed_cwts_target_start_time")) currentSubject.issues.push("missed_cwts_target_start_time");
+                    //         currentSubject.trait = "recessive";
+                    //     }
+                    //     if(!isNSTP(subjectComparedTo)){
+                    //         if(isOverLapping(currentSubject,subjectComparedTo) && isSameLevel(currentSubject,subjectComparedTo)){
+                    //             subjectComparedTo.trait = "recessive";
+                    //         }
+                    //     }
+                    // }
+
+
+                    // //ROTC Checker
+                    // else if(isROTC(currentSubject)){
+                    //     if(currentSubject.day!==rotcTargetDay){
+                    //         if(!currentSubject.issues.includes("missed_rotc_target_day")) currentSubject.issues.push("missed_rotc_target_day");
+                    //         currentSubject.trait = "recessive";
+                    //     }
+                    //     if(currentSubject.startTime.slot!==rotcTargetStartTime){
+                    //         if(!currentSubject.issues.includes("missed_rotc_target_start_time")) currentSubject.issues.push("missed_rotc_target_start_time");
+                    //         currentSubject.trait = "recessive";
+                    //     }
+                    //     if(!isNSTP(subjectComparedTo)){
+                    //         if(isOverLapping(currentSubject,subjectComparedTo) && isSameLevel(currentSubject,subjectComparedTo)){
+                    //             subjectComparedTo.trait = "recessive";
+                    //         }
+                    //     }
+                    // }
+
                 }
             }
         }
@@ -497,15 +605,19 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
                 }
                 //reroll day
                 if((Math.random() < mutationProb)){
+                    let days = ["monday","tuesday","wednesday","thursday","friday","saturday"]
+                    let currentDay = selectedClass.day;
+                    let assignedProfAvailability = selectedClass.professor.availability;
                     if(selectedClass.professor!=="TBA"){
-                        let currentDay = selectedClass.day;
-                        let assignedProfAvailability = selectedClass.professor.availability;
                         if (assignedProfAvailability.length > 1){
                             let newDay = assignedProfAvailability.filter(day=> day!= currentDay);
                             selectedClass.day = fisherYatesShuffler(newDay)[0];
                         }
                         else{
                         }
+                    }
+                    else{
+                        selectedClass.day = fisherYatesShuffler(days)[0];
                     }
                 }
                 //reroll Professor
@@ -578,8 +690,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
         if(fittestSched.fitness < currentGeneration[0].fitness){
             fittestSched = currentGeneration[0];
             if(fittestSched.fitness===1){
-                // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
-                // console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
+                console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
+                console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
                 return fittestSched;
             }
             stagnationCounter=0;
@@ -588,8 +700,8 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
             stagnationCounter++
         }
         newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
-        // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
-        // console.log("Fittest Sched: ", fittestSched);
+        console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
+        console.log("Fittest Sched: ", fittestSched);
     }
     // let nthGeneration = 1;
     // while(fittestSched.fitness != 1){                                                                           //loop that only stops when it finds a 100% fitness schedule
@@ -672,13 +784,12 @@ const isOverLapping = (classObjA,classObjB) => {
 }
 
 const isNSTP = (classObj)=>{
-    if(classObj.subject_code == "NSTP1" || classObj.subject_code == "NSTP2") return true;
-    else false;
+    return classObj.subject_code == "NSTP1" || classObj.subject_code == "NSTP2";
 }
 
 const isSameRoom = (classObjA,classObjB) =>{
     const sameRoom = classObjA.room.room_no === classObjB.room.room_no ? true : false;
-    const bothNotGym = classObjA.room.room_no != "gym" && classObjB.room.room_no != "gym" ? true : false;
+    const bothNotGym = classObjA.room != "gym" && classObjB.room != "gym" ? true : false;
     const bothNotOutdoor = classObjA.room != "TBA" && classObjB.room != "TBA" ? true : false;
     return sameRoom && bothNotGym && bothNotOutdoor ? true : false;
 }
@@ -775,6 +886,20 @@ const isSameLevel = (classObjA,classObjB) => {
 
 const hasTargetTimeAndDate = (classObj,targetTimeSlot, targetDay) => {
     return classObj.startTime.slot == targetTimeSlot && classObj.day === targetDay ? true : false;
+}
+
+const isROTC = (classObj) => {
+    if(isNSTP(classObj)){
+        return classObj.nstpType === "rotc";
+    }
+    else return false;
+}
+
+const isCWTS = (classObj) => {
+    if(isNSTP(classObj)){
+        return classObj.nstpType === "cwts";
+    }
+    else return false;
 }
 
 export const checkForConflicts = (schedArr,editedClassObj) => {

@@ -102,9 +102,7 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
             }
 
             else if(isNSTP(subject)){
-                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Civic Welfare and Training Service ${subject.subject_code.slice(-1)}`, nstpType:"cwts"});
-                series++;
-                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Reserve Officers' Training Corps ${subject.subject_code.slice(-1)}`, nstpType:"rotc"});
+                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series});
                 series++;
             }
             else{
@@ -132,9 +130,7 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
                 series++;
             }
             else if(isNSTP(subject)){
-                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Civic Welfare and Training Service ${subject.subject_code.slice(-1)}`, nstpType:"cwts"});
-                series++;
-                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series,subject_name:`Reserve Officers' Training Corps ${subject.subject_code.slice(-1)}`, nstpType:"rotc"});
+                newsubjectArray.push({...subject,session:"f2f",duration:3,series:series});
                 series++;
             }
             else{
@@ -162,9 +158,7 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
                 series++;
             }
             else if(isNSTP(subject)){
-                newsubjectArray.push({...subject,session:"sync",duration:3,series:series,subject_name:`Civic Welfare and Training Service ${subject.subject_code.slice(-1)}`, nstpType:"cwts"});
-                series++;
-                newsubjectArray.push({...subject,session:"sync",duration:3,series:series,subject_name:`Reserve Officers' Training Corps ${subject.subject_code.slice(-1)}`, nstpType:"rotc"});
+                newsubjectArray.push({...subject,session:"sync",duration:3,series:series});
                 series++;
             }
             else{
@@ -177,14 +171,11 @@ export const subjectSessionPrep = (subjectArray,config) => {                  //
     return newsubjectArray;
 }
 
-const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,config) => {  // returns a group classes by section
+export const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,config) => {  // returns a group classes by section
     const popSize = config.populationSize
-    const cwtsTargetDay = config.cwtsTargetDay;
-    const cwtsTargetStartTime = time.find(slot=>slot.slot==config.cwtsTargetStartTime);
-    const cwtsTargetEndTime = time.find(slot=>slot.slot==config.cwtsTargetStartTime+3);
-    const rotcTargetDay = config.rotcTargetDay;
-    const rotcTargetStartTime = time.find(slot=>slot.slot==config.rotcTargetStartTime);
-    const rotcTargetEndTime = time.find(slot=>slot.slot==config.rotcTargetStartTime+3);
+    const nstpTargetDay = config.nstpTargetDay;
+    const nstpTargetStartTime = time.find(slot=>slot.slot==config.nstpTargetStartTime);
+    const nstpTargetEndTime = time.find(slot=>slot.slot==config.nstpTargetStartTime+3);
 
     let initialPopulation = [];
     let overAllSched = [];
@@ -227,22 +218,12 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                             if(totalDailyHour + subject.duration <= maximumSchoolHoursPerDay){
                                 if(isNSTP(subject)){
                                     chosenRoom = "TBA"
-                                    if(subject.nstpType==="cwts"){
-                                        day = cwtsTargetDay;
-                                        startTime = cwtsTargetStartTime;
-                                        endTime = cwtsTargetEndTime
-                                        subject.assigned = true;
-                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
-                                        totalDailyHour++;
-                                    }
-                                    else{
-                                        day = rotcTargetDay;
-                                        startTime = rotcTargetStartTime;
-                                        endTime = rotcTargetEndTime
-                                        subject.assigned = true;
-                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
-                                        totalDailyHour++;
-                                    }
+                                    day = nstpTargetDay;
+                                    startTime = nstpTargetStartTime;
+                                    endTime = nstpTargetEndTime;
+                                    subject.assigned = true;
+                                    sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                    totalDailyHour++;
                                 }
                                 else{
                                     if(subject.session=="sync"){
@@ -264,22 +245,12 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
                             if(totalDailyHour + subject.duration <= maximumSchoolHoursPerDay){
                                 if(isNSTP(subject)){
                                     chosenRoom = "TBA"
-                                    if(subject.nstpType==="cwts"){
-                                        day = cwtsTargetDay;
-                                        startTime = cwtsTargetStartTime;
-                                        endTime = cwtsTargetEndTime
-                                        subject.assigned = true;
-                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
-                                        totalDailyHour++;
-                                    }
-                                    else{
-                                        day = rotcTargetDay;
-                                        startTime = rotcTargetStartTime;
-                                        endTime = rotcTargetEndTime
-                                        subject.assigned = true;
-                                        sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
-                                        totalDailyHour++;
-                                    }
+                                    day = nstpTargetDay;
+                                    startTime = nstpTargetStartTime;
+                                    endTime = nstpTargetEndTime;
+                                    subject.assigned = true;
+                                    sectionLevelSched.push({...subject,section:currentSection,day:day,room:chosenRoom, startTime:startTime,endTime:endTime,sectionAlias:sectionAlias});
+                                    totalDailyHour++;
                                 }
                                 else{
                                     if(subject.session=="sync"){
@@ -319,7 +290,7 @@ const initializePopulation = (prepdSubjectsArray,roomsArray,departmentArray,conf
     return initialPopulation;
 }
 
-const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //this function evaluates the fitness of a single generated schedule - NEEDS CONSTANT REFINING
+export const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //this function evaluates the fitness of a single generated schedule - NEEDS CONSTANT REFINING
         const implementationType = config.sessionImplementation;
         // const nstpTargetDay = config.nstpTargetDay;
         // const nstpTargetStartTime = config.nstpTargetStartTime;
@@ -469,10 +440,7 @@ const fitnessFunction = (approvedSchedArr,scheduleArray,config) => {        //th
 
         dominantClasses = scheduleArray.filter(selectedClass=>selectedClass.trait==="dominant").length;
         evaluatedSchedule = (dominantClasses/allClassesCount); //simple fitness formula
-        //For Debugging purposes only
-        // console.log(`Classes Count: ${scheduleArray.length}, total oopsies: ${totalOopsiePoints}, maximum oopsies: ${maximumOopsiePoints}, NSTP Classes: ${nstpClassCount}`);
-        // console.log(`Fitness: ${evaluatedSchedule*100}%, No. of recessive traits: ${recessiveCount}`);
-        // scheduleArray=scheduleArray.sort((a,b)=>a.series-b.series);
+        // console.log(`(${dominantClasses}/${allClassesCount}) = ${(evaluatedSchedule*100).toFixed(2)}%`);
         return {fitness:evaluatedSchedule, schedule:scheduleArray};
 }
 
@@ -488,8 +456,9 @@ const evaluatePopulation = (approvedSchedArr,schedPopulation,config) => {   //th
     return evaluatedPopulation;
 }
 
-const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) => {           //this function splices the genomes of the best schedule - 2 at a time
+const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,elitePopulation,config) => {           //this function splices the genomes of the best schedule - 2 at a time
     let crossOveredSched = [];
+    schedule = [...elitePopulation.map(member=>member.schedule),...schedule.slice(0,schedule.length-elitePopulation.length)]
     //Eugenics Operator
     if(stagnationCounter%50===0 && stagnationCounter > 0){
         let bestHalfArr = [];
@@ -542,7 +511,6 @@ const crossOverFunction = (schedule,stagnationCounter,approvedSchedArr,config) =
         let secondHalf = evaluatePopulation(approvedSchedArr,schedule.slice(midIndex),config).sort((a,b)=>a.fitness-b.fitness).map(sched=>sched.schedule);
         const firstHalfLen = firstHalf.length;
         // const secondHalfLen = secondHalf.length;
-
         for(let schedCurrentIndex = 0; schedCurrentIndex < firstHalfLen; schedCurrentIndex++){
             let parentA = firstHalf[schedCurrentIndex];
             let parentB = secondHalf[schedCurrentIndex];
@@ -681,27 +649,45 @@ const mutationFunction = (schedPopulation,roomsArray,professors,config) => {    
 
 const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors,config) => {   //[WORK IN PROGRESS - Mutation Function not yet Implemented]this function will perform the crossover functions and mutations to generate a new generation of schedules.
     const generationCount = config.maxGenerations;
-    let newGeneration = initialPopulation;
-    let fittestSched = evaluatePopulation(approvedSchedArr,newGeneration,config).sort((a,b)=>b.fitness-a.fitness)[0];
-    let stagnationCounter = 0
+    let currentGeneration = initialPopulation;
+    let elitePopulation = evaluatePopulation(approvedSchedArr,currentGeneration,config).sort((a,b)=>b.fitness-a.fitness).slice(0,Math.floor(currentGeneration.length*config.elitePopPercentage));
+    let elitePopAverageFitness = elitePopulation.reduce((total,member)=>{return total+=member.fitness},0)/elitePopulation.length;
+    let currentGenEliteAveFitness = elitePopAverageFitness;
+    // let fittestSched = elitePopulation[0];
+    let stagnationCounter = 0;
+    let newGeneration = [];
     for(let generationCounter = 0; generationCounter < generationCount; generationCounter++){
-        let currentGeneration = crossOverFunction(newGeneration,stagnationCounter,approvedSchedArr,config).sort((a,b)=>b.fitness-a.fitness);
-        newGeneration = currentGeneration.map(sched=>sched.schedule);
-        if(fittestSched.fitness < currentGeneration[0].fitness){
-            fittestSched = currentGeneration[0];
-            if(fittestSched.fitness===1){
-                console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100)}%`);
-                console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
-                return fittestSched;
+        newGeneration = crossOverFunction(currentGeneration,stagnationCounter,approvedSchedArr,elitePopulation,config).map(sched=>sched.schedule);
+        newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).sort((a,b)=>b.fitness-a.fitness);
+        currentGenEliteAveFitness = newGeneration.slice(0,elitePopulation.length).reduce((total,member)=>{return total+=member.fitness},0)/elitePopulation.length;
+        currentGeneration = newGeneration.map(member=>member.schedule);
+        if(elitePopAverageFitness < currentGenEliteAveFitness){
+            elitePopulation = newGeneration.slice(0,elitePopulation.length);
+            // console.log(`${elitePopulation[0].fitness} - ${fitnessFunction(approvedSchedArr,elitePopulation[0].schedule,config).fitness}`);
+            // console.log(`${elitePopAverageFitness} -> ${currentGenEliteAveFitness}`);
+            console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Highest Average Fitness: ${(elitePopAverageFitness*100).toFixed(2)}, This Generation's Average Fitness: ${(currentGenEliteAveFitness*100).toFixed(2)}%`);
+            elitePopAverageFitness = currentGenEliteAveFitness;
+            if(elitePopAverageFitness >= 95){
+                return elitePopulation;
             }
             stagnationCounter=0;
         }
+        // if(fittestSched.fitness < newGeneration[0].fitness){
+        //     fittestSched = newGeneration[0];
+        //     if(fittestSched.fitness===1){
+        //         console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(newGeneration[0].fitness*100)}%`);
+        //         console.log("Fittest Sched: ", fittestSched, " ",fittestSched.schedule.filter(selectedClasses=>selectedClasses.trait==="dominant").length, " of ",fittestSched.length);
+        //         return fittestSched;
+        //     }
+        //     stagnationCounter=0;
+        // }
         else{
             stagnationCounter++
         }
-        newGeneration = evaluatePopulation(approvedSchedArr,mutationFunction(newGeneration,roomsArray,professors,config),config).map(sched=>sched.schedule);
-        console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(currentGeneration[0].fitness*100).toFixed(2)}%`);
-        console.log("Fittest Sched: ", fittestSched);
+        // console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Best Fitness: ${(fittestSched.fitness*100).toFixed(2)}%, This Generation's Best: ${(newGeneration[0].fitness*100).toFixed(2)}%`);
+        // console.log("Fittest Sched: ", fittestSched);
+        console.log(`Generation: ${generationCounter+1}, Stagnation Counter: ${stagnationCounter}, Highest Average Fitness: ${(elitePopAverageFitness*100).toFixed(2)}%, This Generation's Average Fitness: ${(newGeneration[0].fitness*100).toFixed(2)}%`);
+        // console.log("Fittest Sched: ", fittestSched);
     }
     // let nthGeneration = 1;
     // while(fittestSched.fitness != 1){                                                                           //loop that only stops when it finds a 100% fitness schedule
@@ -715,13 +701,21 @@ const generationLoop = (approvedSchedArr,initialPopulation,roomsArray,professors
     //     console.log("Fittest Sched: ", fittestSched);
     //     nthGeneration++;
     // }
-    return fittestSched;
+    // console.log(newGeneration.slice(0,4));
+    // console.log(evaluatePopulation(approvedSchedArr,newGeneration.slice(0,4).map(member=>member.schedule),config));
+    // console.log(elitePopulation);
+    return elitePopulation;
 }
 
 export const geneticAlgorithm = (roomsArray,department,prepdSubjects,approvedSchedArr,professors,config) => {     //[WORK IN PROGRESS]this is hte Main Genetic Algorithm function
     let initPopArray = initializePopulation(prepdSubjects,roomsArray,department,config);
-    let fittestSched = generationLoop(approvedSchedArr,initPopArray,roomsArray,professors,config);
-    return fittestSched.schedule;
+    let fittestScheds = generationLoop(approvedSchedArr,initPopArray,roomsArray,professors,config);
+    // console.log(fittestSched.fitness);
+    // console.log(fitnessFunction(approvedSchedArr,fittestSched.schedule,config).fitness);
+    // console.log(fitnessFunction(approvedSchedArr,fittestSched.schedule,config).fitness);
+    // console.log(fitnessFunction(approvedSchedArr,fittestSched.schedule,config).fitness);
+    // console.log(fitnessFunction(approvedSchedArr,fittestSched.schedule,config).fitness);
+    return fittestScheds;
 }
 
 //utility/non-GA functions section
@@ -788,18 +782,18 @@ const isNSTP = (classObj)=>{
 }
 
 const isSameRoom = (classObjA,classObjB) =>{
-    const sameRoom = classObjA.room.room_no === classObjB.room.room_no ? true : false;
-    const bothNotGym = classObjA.room != "gym" && classObjB.room != "gym" ? true : false;
-    const bothNotOutdoor = classObjA.room != "TBA" && classObjB.room != "TBA" ? true : false;
-    return sameRoom && bothNotGym && bothNotOutdoor ? true : false;
+    const sameRoom = classObjA.room.room_no === classObjB.room.room_no;
+    const bothNotGym = classObjA.room != "gym" && classObjB.room != "gym";
+    const bothNotOutdoor = classObjA.room != "TBA" && classObjB.room != "TBA";
+    return sameRoom && bothNotGym && bothNotOutdoor;
 }
 
 const isSameProfessor = (classObjA,classObjB) => {
-    return classObjA.professor.fullname === classObjB.professor.fullname ? true : false;
+    return classObjA.professor.fullname === classObjB.professor.fullname;
 }
 
 const isSameDay = (classObjA,classObjB) => {
-    return classObjA.day === classObjB.day ? true : false;
+    return classObjA.day === classObjB.day;
 }
 
 const isSameSection = (classObjA,classObjB) => {
